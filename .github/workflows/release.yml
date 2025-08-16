@@ -9,33 +9,35 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+      # Клонируем репозиторий
       - uses: actions/checkout@v3
 
+      # Настройка Node.js (если нужен для сборки, можно убрать)
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: "18"
 
-      - name: Build project
-        run: |
-          npm ci
-          npm run build
+      # (Опционально) сборка проекта, если нужен билд
+      # - name: Build project
+      #   run: |
+      #     npm ci
+      #     npm run build
 
-      - name: Extract release notes from CHANGELOG.md
+      # Парсим CHANGELOG.md для текущего тега
+      - name: Extract release notes
         id: changelog
-        run: |
-          TAG=${GITHUB_REF#refs/tags/}
-          NOTES=$(awk "/## \\[${TAG}\\].*/,/^## /{if(!/^## /) print}" CHANGELOG.md)
-          NOTES=$(echo "$NOTES" | sed '/^\s*$/d')
-          echo "notes<<EOF" >> $GITHUB_ENV
-          echo "$NOTES" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+        uses: JasonEtco/keep-a-changelog-action@v1
+        with:
+          tag: ${{ github.ref_name }}
 
-      - name: Create GitHub Release
+      # Создаем релиз на GitHub
+      - name: Create GitHub Release (source code only)
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
-          body: ${{ env.notes }}
+          body: ${{ steps.changelog.outputs.notes }}
+          files: ""  # пусто → добавятся только исходники (zip/tar.gz)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
