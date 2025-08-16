@@ -8,24 +8,28 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
 
-      - name: Build project
+      - name: Install dependencies and build
         run: |
           npm ci
           npm run build
 
-      - name: Extract release notes from Keep a Changelog
+      - name: Extract release notes from CHANGELOG.md
         id: changelog
         run: |
           TAG=${GITHUB_REF#refs/tags/}
           NOTES=$(awk "/## \\[${TAG}\\]/,/^## /{if(!/^## /) print}" CHANGELOG.md)
+          # удаляем пустые строки в начале и конце
+          NOTES=$(echo "$NOTES" | sed '/^\s*$/d')
           echo "notes<<EOF" >> $GITHUB_ENV
           echo "$NOTES" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
