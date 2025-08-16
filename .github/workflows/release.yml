@@ -72,11 +72,13 @@ jobs:
           echo "✅ Заметки сохранены в переменную окружения"
 
       # Создаем релиз
-      - name: Create GitHub Release
+      - name: Debug release info
         run: |
           echo "🏷️ Создаем релиз для тега: ${{ github.ref_name }}"
           echo "📝 Заметки из переменной окружения:"
           echo "${{ env.notes }}"
+
+      - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
