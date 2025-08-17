@@ -3,29 +3,49 @@ name: Release
 on:
   push:
     tags:
-      - 'v*.*.*'
+      - "v*.*.*"
 
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+      # Clone repository completely
       - uses: actions/checkout@v3
 
+      # Setup Node.js (optional)
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
+          node-version: "18"
 
-      - name: Build project
-        run: |
-          npm ci
-          npm run build
-
-      - name: Extract release notes from Keep a Changelog
+      # Parse CHANGELOG.md for current tag
+      - name: Extract release notes
         id: changelog
         run: |
           TAG=${GITHUB_REF#refs/tags/}
-          NOTES=$(awk "/## \\[${TAG}\\]/,/^## /{if(!/^## /) print}" CHANGELOG.md)
+
+          # Check if file exists
+          if [ ! -f "CHANGELOG.md" ]; then
+            echo "❌ CHANGELOG.md file not found!"
+            exit 1
+          fi
+
+          # Remove 'v' from tag beginning for search in CHANGELOG.md
+          TAG_WITHOUT_V=${TAG#v}
+
+          # Use sed for more reliable search
+          START_LINE=$(grep -n "## \[${TAG_WITHOUT_V}\]" CHANGELOG.md | cut -d: -f1)
+
+          if [ -z "$START_LINE" ]; then
+            # Try to find with 'v' at the beginning
+            START_LINE=$(grep -n "## \[${TAG}\]" CHANGELOG.md | cut -d: -f1)
+          fi
+
+          if [ ! -z "$START_LINE" ]; then
+            # Extract notes from found line to next ##
+            NOTES=$(sed -n "${START_LINE},/^## /p" CHANGELOG.md | sed '$d' | sed '/^\s*$/d')
+          fi
+
           echo "notes<<EOF" >> $GITHUB_ENV
           echo "$NOTES" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
@@ -34,16 +54,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
-          name: ${{ github.ref_name }}
+          name: "🚀 Release ${{ github.ref_name }}"
           body: ${{ env.notes }}
-          update_existing: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload release artifacts
-        uses: softprops/action-gh-release@v1
-        with:
-          files: build/**/*
-          update_existing: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
