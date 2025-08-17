@@ -208,8 +208,6 @@ npm start
 | `DB_URL` | Database connection | ❌ No |
 | `LOG_LEVEL` | Logging level | ❌ No |
 
----
-
 ## Types of changes
 
 - **Added** for new features
