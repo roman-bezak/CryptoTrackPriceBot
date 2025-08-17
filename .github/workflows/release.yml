@@ -54,7 +54,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
-          name: ${{ github.ref_name }}
+          name: "🚀 Release ${{ github.ref_name }}"
           body: ${{ env.notes }}
           files: "" # empty → only source code
         env:
