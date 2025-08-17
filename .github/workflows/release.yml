@@ -9,79 +9,46 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      # Клонируем репозиторий полностью
+      # Clone repository completely
       - uses: actions/checkout@v3
 
-      # Настройка Node.js (опционально)
+      # Setup Node.js (optional)
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: "18"
 
-      # Парсим CHANGELOG.md для текущего тега
+      # Parse CHANGELOG.md for current tag
       - name: Extract release notes
         id: changelog
         run: |
           TAG=${GITHUB_REF#refs/tags/}
-          echo "🔍 Ищем заметки для тега: ${TAG}"
-          
-          # Проверяем существование файла
+
+          # Check if file exists
           if [ ! -f "CHANGELOG.md" ]; then
-            echo "❌ Файл CHANGELOG.md не найден!"
+            echo "❌ CHANGELOG.md file not found!"
             exit 1
           fi
-          
-          echo "📖 Содержимое CHANGELOG.md (первые 15 строк):"
-          head -15 CHANGELOG.md
-          
-          echo ""
-          echo "🔍 Ищем секцию для тега [${TAG}]..."
-          
-          # Убираем 'v' из начала тега для поиска в CHANGELOG.md
+
+          # Remove 'v' from tag beginning for search in CHANGELOG.md
           TAG_WITHOUT_V=${TAG#v}
-          echo "🔍 Ищем без 'v': [${TAG_WITHOUT_V}]"
-          
-          # Используем sed для более надежного поиска
+
+          # Use sed for more reliable search
           START_LINE=$(grep -n "## \[${TAG_WITHOUT_V}\]" CHANGELOG.md | cut -d: -f1)
-          
+
           if [ -z "$START_LINE" ]; then
-            echo "⚠️ Секция для тега [${TAG_WITHOUT_V}] не найдена"
-            echo "🔍 Попробуем найти с 'v': [${TAG}]"
+            # Try to find with 'v' at the beginning
             START_LINE=$(grep -n "## \[${TAG}\]" CHANGELOG.md | cut -d: -f1)
-            
-            if [ -z "$START_LINE" ]; then
-              echo "❌ Секция для тега [${TAG}] тоже не найдена"
-              echo "📝 Создаем fallback заметки..."
-              NOTES="## ${TAG}\n\nРелиз создан автоматически. Заметки о релизе не найдены в CHANGELOG.md."
-            else
-              echo "✅ Секция найдена с 'v' в начале на строке ${START_LINE}"
-            fi
-          else
-            echo "✅ Секция найдена без 'v' в начале на строке ${START_LINE}"
           fi
-          
+
           if [ ! -z "$START_LINE" ]; then
-            # Извлекаем заметки от найденной строки до следующего ##
+            # Extract notes from found line to next ##
             NOTES=$(sed -n "${START_LINE},/^## /p" CHANGELOG.md | sed '$d' | sed '/^\s*$/d')
           fi
-          
-          echo ""
-          echo "📝 Извлеченные заметки:"
-          echo "$NOTES"
-          echo ""
-          
+
           echo "notes<<EOF" >> $GITHUB_ENV
           echo "$NOTES" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
-          
-          echo "✅ Заметки сохранены в переменную окружения"
-
-      # Создаем релиз
-      - name: Debug release info
-        run: |
-          echo "🏷️ Создаем релиз для тега: ${{ github.ref_name }}"
-          echo "📝 Заметки из переменной окружения:"
-          echo "${{ env.notes }}"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
@@ -89,6 +56,6 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
           body: ${{ env.notes }}
-          files: ""  # пусто → только исходники
+          files: "" # empty → only source code
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
