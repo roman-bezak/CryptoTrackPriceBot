@@ -161,7 +161,7 @@ CREATE TABLE user_portfolios (
 ## [1.0.0] - 2024-12-19
 
 ### Added
-- 🚀 First release of Telegram bot RR
+- 🚀 First devvvv
 - 💬 Basic commands for cryptocurrency operations
 - 📊 Simple price display
 - ❓ Usage help
