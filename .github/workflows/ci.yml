@@ -1,8 +1,11 @@
 name: CI
 
 on:
-  push:
-    branches: ['dev', 'master']
+  pull_request:
+    branches: 
+      - dev
+      - master
+    types: [opened, synchronize, reopened]
 
 env:
   NODE_VERSION: '20'
@@ -31,9 +34,9 @@ jobs:
           npm run lint
           echo "::endgroup::"
 
-      - name: Run Typescript lint
+      - name: Run TypeScript Lint
         run: |
-          echo "::group::🔍 Running TS checks"
+          echo "::group::🔍 Running TypeScript Lint"
           npm run ts:lint
           echo "::endgroup::"
 
