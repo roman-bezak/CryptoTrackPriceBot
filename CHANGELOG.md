@@ -158,10 +158,10 @@ CREATE TABLE user_portfolios (
 3. `/export` - Export data to CSV
 4. `/settings` - Configure preferences
 
-## [1.0.5] - 2024-12-19
+## [1.0.0] - 2024-12-19
 
 ### Added
-- 🚀 First release of Telegram bot
+- 🚀 First release of Telegram bot RR
 - 💬 Basic commands for cryptocurrency operations
 - 📊 Simple price display
 - ❓ Usage help
