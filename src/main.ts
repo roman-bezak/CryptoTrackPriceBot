@@ -8,7 +8,7 @@ const config = {
   NODE_ENV: 'development',
 };
 
-console.log(test.name, process.env.NODE_ENV);
+console.log(test, process.env.NODE_ENV);
 
 const bot = new Telegraf(config.BOT_TOKEN);
 
