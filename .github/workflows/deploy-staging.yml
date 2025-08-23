@@ -9,23 +9,39 @@ jobs:
     environment: staging
 
     env:
-      DEPLOY_ENV: staging
-      SECRETS_LIST: DEPLOY_ENV API_KEY DB_PASS SERVICE_URL
+      SECRET_NAMES=(
+        "DEPLOY_ENV"
+        "DOCKERHUB_USERNAME" 
+        "DOCKERHUB_REPO_NAME"
+        "DOCKERHUB_TOKEN"
+        "VPS_HOST"
+        "VPS_USER"
+        "VPS_SSH_KEY"
+        "VPS_WORKDIR"
+      )
 
-      # DockerHub
-      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      DOCKERHUB_REPO_NAME: ${{ secrets.DOCKERHUB_REPO_NAME }}
+      # # DockerHub
+      # DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      # DOCKERHUB_REPO_NAME: ${{ secrets.DOCKERHUB_REPO_NAME }}
 
-      # VPS
-      VPS_HOST: ${{ secrets.VPS_HOST }}
-      VPS_USER: ${{ secrets.VPS_USER }}
-      VPS_WORKDIR: ${{ secrets.VPS_WORKDIR }}
+      # # VPS
+      # VPS_HOST: ${{ secrets.VPS_HOST }}
+      # VPS_USER: ${{ secrets.VPS_USER }}
+      # VPS_WORKDIR: ${{ secrets.VPS_WORKDIR }}
 
     steps:
+      - name: Export secrets
+        run: |
+          for secret_name in ${{ env.SECRET_NAMES }}; do
+            echo "$secret_name=${{ secrets.$secret_name }}" >> .env
+          done
+
+          cat .env
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Создать .env
+      - name: Create .env file
         run: |
           # echo "DEPLOY_ENV=$DEPLOY_ENV" > .env
           echo "DEPLOY_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> .env
