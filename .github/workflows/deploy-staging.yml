@@ -27,17 +27,16 @@ jobs:
 
       - name: Create .env file
         run: |
-          cat <<EOF > .env
-            DEPLOY_ENV=${DEPLOY_ENV}
-            DOCKERHUB_USERNAME=${DOCKERHUB_USERNAME}
-            DOCKERHUB_REPO_NAME=${DOCKERHUB_REPO_NAME}
-            DOCKERHUB_TOKEN=${DOCKERHUB_TOKEN}
-            VPS_HOST=${VPS_HOST}
-            VPS_USER=${VPS_USER}
-            VPS_WORKDIR=${VPS_WORKDIR}
-            DEPLOY_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-            EOF
-          cat .env  # для отладки, секреты скрыты в логах
+          {
+            echo "DEPLOY_ENV=${DEPLOY_ENV}"
+            echo "DOCKERHUB_USERNAME=${DOCKERHUB_USERNAME}"
+            echo "DOCKERHUB_REPO_NAME=${DOCKERHUB_REPO_NAME}"
+            echo "DOCKERHUB_TOKEN=${DOCKERHUB_TOKEN}"
+            echo "VPS_HOST=${VPS_HOST}"
+            echo "VPS_USER=${VPS_USER}"
+            echo "VPS_WORKDIR=${VPS_WORKDIR}"
+            echo "DEPLOY_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+          } > .env
 
       - name: Log in to DockerHub
         uses: docker/login-action@v3
