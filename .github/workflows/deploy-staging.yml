@@ -9,20 +9,23 @@ jobs:
     environment: staging
 
     env:
+      # Environment variables
       DEPLOY_ENV: ${{ vars.DEPLOY_ENV }}
+      VPS_WORKDIR: ${{ vars.VPS_WORKDIR }}
+
+      # Secrets
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_REPO_NAME: ${{ secrets.DOCKERHUB_REPO_NAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
       VPS_HOST: ${{ secrets.VPS_HOST }}
       VPS_USER: ${{ secrets.VPS_USER }}
       VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
-      VPS_WORKDIR: ${{ vars.VPS_WORKDIR }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create .env (только для VPS)
+      - name: Create .env file
         run: |
           cat <<EOF > .env
             DEPLOY_ENV=${DEPLOY_ENV}
@@ -31,12 +34,10 @@ jobs:
             DOCKERHUB_TOKEN=${DOCKERHUB_TOKEN}
             VPS_HOST=${VPS_HOST}
             VPS_USER=${VPS_USER}
-            VPS_SSH_KEY=${VPS_SSH_KEY}
             VPS_WORKDIR=${VPS_WORKDIR}
             DEPLOY_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          EOF
-
-          cat .env  # только для отладки (секреты будут скрыты в логах GitHub)
+            EOF
+          cat .env  # для отладки, секреты скрыты в логах
 
       - name: Log in to DockerHub
         uses: docker/login-action@v3
@@ -58,6 +59,11 @@ jobs:
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Add VPS to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ env.VPS_HOST }} >> ~/.ssh/known_hosts
 
       - name: Copy files to VPS
         run: |
