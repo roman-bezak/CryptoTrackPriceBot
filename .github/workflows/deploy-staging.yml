@@ -9,8 +9,7 @@ jobs:
     environment: staging
 
     env:
-      # Переменные из GitHub Secrets
-      DEPLOY_ENV: ${{ secrets.DEPLOY_ENV }}
+      DEPLOY_ENV: ${{ env.DEPLOY_ENV }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_REPO_NAME: ${{ secrets.DOCKERHUB_REPO_NAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
