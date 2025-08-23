@@ -1,35 +1,13 @@
 import { Telegraf } from 'telegraf';
 
-import { test } from './test.js';
+import { config } from './config/ConfigService.js';
 
-<<<<<<< Updated upstream
-// Mock config with fake token
-const config = {
-  BOT_TOKEN: 'mock_bot_token_1234567890:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef',
-  NODE_ENV: 'development',
-};
-
-console.log(test, process.env.NODE_ENV);
-
-const bot = new Telegraf(config.BOT_TOKEN);
-
-bot.start(ctx => {
-  ctx.reply('🤖 Bot started with mock token');
-});
-
-// Launch bot
-bot
-  .launch()
-  .then(() => console.log('🚀 Bot launched with mock token'))
-  .catch(() => {
-    process.exit(1);
-=======
 // === Initial logs ===
-console.log(`🌍 NODE_ENV: ${configService.get('nodeEnv')}`);
+console.log(`🌍 NODE_ENV: ${config.get('NODE_ENV')}`);
 console.log('🚀 Starting CryptoTrackPriceBot...');
 
 // === Init bot ===
-const bot = new Telegraf(configService.get('botToken'));
+const bot = new Telegraf(config.get('BOT_TOKEN'));
 
 // === Commands ===
 bot.start(ctx => ctx.reply('🤖 Welcome to CryptoTrackPriceBot!'));
@@ -44,32 +22,22 @@ bot.catch((err, ctx) => {
 try {
   bot.launch({ dropPendingUpdates: true }, () => {
     console.log('✅ Bot successfully launched!');
-    console.log(`🔗 API Base URL: ${configService.get('api')?.baseUrl}`);
->>>>>>> Stashed changes
   });
 } catch (error) {
   console.error('❌ Failed to launch bot:', error);
   process.exit(1);
 }
 
-<<<<<<< Updated upstream
-// Graceful shutdown
-const gracefulShutdown = (signal: any) => {
-  bot.stop(signal);
-=======
 // === Graceful shutdown ===
 const gracefulShutdown = (signal: string) => {
   console.log(`\n🛑 Received ${signal}, stopping bot...`);
   bot.stop(signal);
   console.log('✅ Bot stopped gracefully');
->>>>>>> Stashed changes
   process.exit(0);
 };
 
 process.once('SIGINT', () => gracefulShutdown('SIGINT'));
 process.once('SIGTERM', () => gracefulShutdown('SIGTERM'));
-<<<<<<< Updated upstream
-=======
 
 // === Global error handlers (last resort) ===
 process.on('uncaughtException', error => {
@@ -79,4 +47,3 @@ process.on('uncaughtException', error => {
 process.on('unhandledRejection', (reason, promise) => {
   console.error('💥 Unhandled Rejection at:', promise, 'reason:', reason);
 });
->>>>>>> Stashed changes

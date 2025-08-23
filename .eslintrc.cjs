@@ -36,10 +36,10 @@ module.exports = {
         'newlines-between': 'always',
       },
     ],
-    'no-console': 'warn',
+    'no-console': 'off',
     'no-debugger': 'error',
     'prettier/prettier': ['error', { trailingComma: 'all' }],
-    'sort-keys': ['error', 'asc', { caseSensitive: false, natural: true }],
+    'sort-keys': ['off', 'asc', { caseSensitive: false, natural: true }],
     'sort-vars': 'error',
   },
   settings: {
