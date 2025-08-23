@@ -23,12 +23,12 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Get environment secrets
-          env:
-            TARGET_ENV: staging
-          run: |
-            gh secret list --env $TARGET_ENV --json name,value | \
-              jq -r '.[] | .name + "=\"" + .value + "\""' > .env
+        env:
+          TARGET_ENV: staging
+        run: |
+          gh secret list --env $TARGET_ENV --json name,value | \
+            jq -r '.[] | .name + "=\"" + .value + "\""' > .env
 
-            echo "DEPLOY_ENV=$TARGET_ENV" >> .env
-            echo "DEPLOY_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> .env
-            cat .env
+          echo "DEPLOY_ENV=$TARGET_ENV" >> .env
+          echo "DEPLOY_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> .env
+          cat .env
