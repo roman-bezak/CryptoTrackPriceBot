@@ -9,12 +9,12 @@
     "npm": ">=9.0.0"
   },
   "scripts": {
-    "build": "rimraf dist && tsc && npm run copy:assets",
+    "build": "rimraf dist && tsc",
     "start:prod": "cross-env NODE_ENV=production node dist/main.js",
     "start:dev": "cross-env NODE_ENV=development node dist/main.js",
-    "copy:assets": "shx cp -r prisma dist/",
     "test": "echo coming soon...",
     "format": "prettier --write .",
+    "format:bash": "find scripts/ -name '*.sh' -type f -exec shfmt -i 2 -w {} \\;",
     "lint": "eslint . --ext .ts",
     "lint:fix": "eslint . --ext .ts --fix",
     "ts:lint": "tsc --noEmit"
@@ -52,7 +52,6 @@
     "prettier": "^3.0.0",
     "prisma": "^5.22.0",
     "rimraf": "^6.0.1",
-    "shx": "^0.4.0",
     "typescript": "^5.9.2"
   }
 }

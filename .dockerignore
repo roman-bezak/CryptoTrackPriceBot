@@ -6,25 +6,39 @@ yarn-error.log*
 
 # Build outputs
 dist
-*.tsbuildinfo
+build
 
-# Prisma
-.prisma/
-
-# Database files
-*.db
-*.db-journal
-
-# Environment files (safety)
+# Environment files
 .env
-.env.*
 .env.local
-.env.production
 .env.development
+.env.test
+.env.production
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
 # Git
 .git
 .gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose*.yml
 
 # Logs
 logs
@@ -40,21 +54,53 @@ pids
 coverage
 *.lcov
 
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+# nyc test coverage
+.nyc_output
 
-# IDE
-.vscode
-.idea
-*.swp
-*.swo
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
 
 # Temporary folders
-tmp
-temp
+tmp/
+temp/
+
+# Database files (development and test databases)
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+dev.db
+test.db
+
+# Documentation
+README.md
+CHANGELOG.md
+LICENSE
+*.md
+
+# Test files
+test/
+tests/
+__tests__/
+*.test.js
+*.test.ts
+*.spec.js
+*.spec.ts
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
