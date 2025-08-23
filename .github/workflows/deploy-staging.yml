@@ -1,0 +1,34 @@
+name: Deploy
+
+# on:
+#   push:
+#     branches: [dev]
+#     tags: ['v*']
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup GitHub CLI
+          uses: actions-hub/github-cli@1.0.0
+          with:
+            token: ${{ secrets.GITHUB_TOKEN }}
+
+        - name: Get environment secrets
+          env:
+            TARGET_ENV: staging
+          run: |
+            gh secret list --env $TARGET_ENV --json name,value | \
+              jq -r '.[] | .name + "=\"" + .value + "\""' > .env
+
+            echo "DEPLOY_ENV=$TARGET_ENV" >> .env
+            echo "DEPLOY_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> .env
+            cat .env
