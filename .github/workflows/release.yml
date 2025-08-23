@@ -15,6 +15,7 @@ jobs:
       # Parse CHANGELOG.md for current tag
       - name: Extract release notes
         id: changelog
+        continue-on-error: true # TODO: check fallback
         run: |
           TAG=${GITHUB_REF#refs/tags/}
 
@@ -51,5 +52,6 @@ jobs:
           name: "🚀 Release ${{ github.ref_name }}"
           body: ${{ env.notes }}
           files: "" # empty → only source code
+          generate_release_notes: true # TODO: check fallback
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
