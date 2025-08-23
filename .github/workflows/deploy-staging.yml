@@ -9,47 +9,33 @@ jobs:
     environment: staging
 
     env:
-      SECRET_NAMES=(
-        "DEPLOY_ENV"
-        "DOCKERHUB_USERNAME" 
-        "DOCKERHUB_REPO_NAME"
-        "DOCKERHUB_TOKEN"
-        "VPS_HOST"
-        "VPS_USER"
-        "VPS_SSH_KEY"
-        "VPS_WORKDIR"
-      )
-
-      # # DockerHub
-      # DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-      # DOCKERHUB_REPO_NAME: ${{ secrets.DOCKERHUB_REPO_NAME }}
-
-      # # VPS
-      # VPS_HOST: ${{ secrets.VPS_HOST }}
-      # VPS_USER: ${{ secrets.VPS_USER }}
-      # VPS_WORKDIR: ${{ secrets.VPS_WORKDIR }}
+      # Переменные из GitHub Secrets
+      DEPLOY_ENV: ${{ secrets.DEPLOY_ENV }}
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_REPO_NAME: ${{ secrets.DOCKERHUB_REPO_NAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+      VPS_HOST: ${{ secrets.VPS_HOST }}
+      VPS_USER: ${{ secrets.VPS_USER }}
+      VPS_WORKDIR: ${{ secrets.VPS_WORKDIR }}
 
     steps:
-      - name: Export secrets
-        run: |
-          for secret_name in ${{ env.SECRET_NAMES }}; do
-            echo "$secret_name=${{ secrets.$secret_name }}" >> .env
-          done
-
-          cat .env
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Create .env file
+      - name: Create .env (только для VPS)
         run: |
-          # echo "DEPLOY_ENV=$DEPLOY_ENV" > .env
-          echo "DEPLOY_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> .env
+          cat <<EOF > .env
+            DEPLOY_ENV=${DEPLOY_ENV}
+            DOCKERHUB_USERNAME=${DOCKERHUB_USERNAME}
+            DOCKERHUB_REPO_NAME=${DOCKERHUB_REPO_NAME}
+            DOCKERHUB_TOKEN=${DOCKERHUB_TOKEN}
+            VPS_HOST=${VPS_HOST}
+            VPS_USER=${VPS_USER}
+            VPS_WORKDIR=${VPS_WORKDIR}
+            DEPLOY_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          EOF
 
-          for key in $SECRETS_LIST; do
-            value="${!key}"
-            echo "$key=$value" >> .env
-          done
+          cat .env  # только для отладки (секреты будут скрыты в логах GitHub)
 
       - name: Log in to DockerHub
         uses: docker/login-action@v3
@@ -72,10 +58,9 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
 
-      - name: Copy files to VPS via SCP
+      - name: Copy files to VPS
         run: |
           ssh ${{ env.VPS_USER }}@${{ env.VPS_HOST }} "mkdir -p ${{ env.VPS_WORKDIR }}"
-
           scp .env scripts/deploy.sh docker-compose.yml ${{ env.VPS_USER }}@${{ env.VPS_HOST }}:${{ env.VPS_WORKDIR }}/
 
       - name: Run deploy script on VPS
