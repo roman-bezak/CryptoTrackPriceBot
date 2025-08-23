@@ -15,7 +15,8 @@ jobs:
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
       VPS_HOST: ${{ secrets.VPS_HOST }}
       VPS_USER: ${{ secrets.VPS_USER }}
-      VPS_WORKDIR: ${{ secrets.VPS_WORKDIR }}
+      VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+      VPS_WORKDIR: ${{ vars.VPS_WORKDIR }}
 
     steps:
       - name: Checkout repository
@@ -30,6 +31,7 @@ jobs:
             DOCKERHUB_TOKEN=${DOCKERHUB_TOKEN}
             VPS_HOST=${VPS_HOST}
             VPS_USER=${VPS_USER}
+            VPS_SSH_KEY=${VPS_SSH_KEY}
             VPS_WORKDIR=${VPS_WORKDIR}
             DEPLOY_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           EOF
