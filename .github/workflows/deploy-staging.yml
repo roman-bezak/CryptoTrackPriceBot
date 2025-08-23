@@ -50,26 +50,26 @@ jobs:
           name: env-file
           path: .env
 
-  docker-login:
+  docker-build:
     runs-on: ubuntu-latest
     environment: staging
     needs: setup
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download .env file
+        uses: actions/download-artifact@v4
+        with:
+          name: env-file
+          path: .
+
       - name: Log in to DockerHub
         uses: docker/login-action@v3
         with:
           username: ${{ env.DOCKERHUB_USERNAME }}
           password: ${{ env.DOCKERHUB_TOKEN }}
-
-  docker-build:
-    runs-on: ubuntu-latest
-    environment: staging
-    needs: [setup, docker-login]
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
@@ -84,7 +84,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: staging
-    needs: [setup, docker-login, docker-build]
+    needs: [setup, docker-build]
 
     steps:
       - name: Download .env file
