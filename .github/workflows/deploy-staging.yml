@@ -68,6 +68,9 @@ jobs:
     needs: [setup, docker-login]
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
@@ -88,6 +91,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: env-file
+          path: .
 
       - name: Checkout repository (for deploy files)
         uses: actions/checkout@v4
