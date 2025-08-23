@@ -9,7 +9,7 @@ jobs:
     environment: staging
 
     env:
-      DEPLOY_ENV: ${{ env.DEPLOY_ENV }}
+      DEPLOY_ENV: ${{ vars.DEPLOY_ENV }}
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_REPO_NAME: ${{ secrets.DOCKERHUB_REPO_NAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
