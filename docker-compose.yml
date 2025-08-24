@@ -1,1 +1,14 @@
-# coming soon
+version: '3.8'
+
+services:
+  crypto-track-price-bot:
+    image: ${DOCKER_IMAGE:-crypto-track-price-bot:latest}
+    container_name: crypto-track-price-bot
+    env_file:
+      - .env
+    volumes:
+      - ${DATABASE_PATH:-./db}:/app/db
+    restart: unless-stopped
+    
+    # Проверяем что хост-директория существует
+    # Если нет - Docker создаст её автоматически, но лучше подготовить заранее
