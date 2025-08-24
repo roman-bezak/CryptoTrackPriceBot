@@ -10,4 +10,5 @@
   printenv
 
   echo "API Key: $BOT_TOKEN"
+  echo "API Key: $BOT_TOKEN"
 )
