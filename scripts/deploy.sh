@@ -7,8 +7,7 @@
     set +a
   fi
 
-  echo "Database: $DB_HOST:$DB_PORT"
-  echo "API Key: $API_KEY"
+  printenv
 
   echo "API Key: $BOT_TOKEN"
 )

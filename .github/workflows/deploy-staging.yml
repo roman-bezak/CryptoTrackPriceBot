@@ -4,6 +4,12 @@ on:
   push:
     branches: [ dev ]
 
+concurrency:
+  group: staging-deploy
+  cancel-in-progress: false
+
+run-name: "🛠️ Staging Deploy - ${{ github.sha }}"
+
 env:
   # Environment variables
   DEPLOY_ENV: ${{ vars.DEPLOY_ENV }}
@@ -38,6 +44,8 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
+          load: false
+          outputs: false
           tags: |
             ${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPO_NAME }}:${{ env.DEPLOY_ENV }}-latest
             ${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPO_NAME }}:${{ env.DEPLOY_ENV }}-${{ github.sha }}
@@ -48,7 +56,7 @@ jobs:
     needs: docker-build
     
     steps:
-      - name: Checkout repository (for deploy files)
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Setup SSH for SCP
@@ -65,11 +73,6 @@ jobs:
         run: |
           {
             echo "DEPLOY_ENV=${DEPLOY_ENV}"
-            echo "DOCKERHUB_USERNAME=${DOCKERHUB_USERNAME}"
-            echo "DOCKERHUB_REPO_NAME=${DOCKERHUB_REPO_NAME}"
-            echo "DOCKERHUB_TOKEN=${DOCKERHUB_TOKEN}"
-            echo "VPS_HOST=${VPS_HOST}"
-            echo "VPS_USER=${VPS_USER}"
             echo "VPS_WORKDIR=${VPS_WORKDIR}"
             echo "DEPLOY_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
           } > .env
