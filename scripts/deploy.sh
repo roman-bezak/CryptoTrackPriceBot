@@ -22,7 +22,7 @@ load_env_local() {
 # Check that required environment variables are set
 # ------------------------------
 check_required_vars() {
-  REQUIRED_VARS=("VPS_WORKDIR" "VPS_APP_FOLDER" "VPS_BACKUPS_FOLDER" "VPS_TEMP_DEPLOY_DIR" "DATABASE_URL" "DOCKER_IMAGE" "FACKE_TEST_CRASH")
+  REQUIRED_VARS=("VPS_WORKDIR" "VPS_APP_FOLDER" "VPS_BACKUPS_FOLDER" "VPS_TEMP_DEPLOY_DIR" "DATABASE_URL" "DOCKER_IMAGE")
 
   for var in "${REQUIRED_VARS[@]}"; do
     if [ -z "${!var}" ]; then
