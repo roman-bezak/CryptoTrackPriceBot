@@ -63,7 +63,7 @@ backup_app() {
     echo "Starting backup process..."
 
     # Ensure parent backup directory exists
-    mkdir -p "$BACKUP_DIR"
+    mkdir -p "$TARGET_DIR"
 
     echo "Creating backup folder..."
     echo "Copying files to $TARGET_DIR ..."
