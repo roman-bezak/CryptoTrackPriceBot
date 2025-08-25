@@ -10,7 +10,7 @@ console.log('🚀 Starting CryptoTrackPriceBot...');
 const bot = new Telegraf(config.get('BOT_TOKEN'));
 
 // === Commands ===
-bot.start(ctx => ctx.reply('🤖 Welcome to CryptoTrackPriceBot!'));
+bot.start(ctx => ctx.reply('🤖 Welcome to CryptoTrackPriceBot! v1.0.0'));
 bot.help(ctx => ctx.reply('📚 Available commands:\n/start - Start the bot\n/help - Show this help'));
 
 // === Runtime error handler ===
