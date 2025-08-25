@@ -61,6 +61,10 @@ backup_app() {
 
   if [ -d "$APP_DIR" ]; then
     echo "Starting backup process..."
+
+    # Ensure parent backup directory exists
+    mkdir -p "$BACKUP_DIR"
+
     echo "Creating backup folder..."
     echo "Copying files to $TARGET_DIR ..."
 
@@ -71,7 +75,7 @@ backup_app() {
       exit 1
     fi
   else
-    echo "⚠️  Source folder ($APP_DIR) missing, skipping backup"
+    echo "⚠️ Source folder ($APP_DIR) missing, skipping backup"
   fi
 }
 
@@ -90,7 +94,7 @@ deploy_app() {
       exit 1
     }
   else
-    echo "❌ deploy_app:Temp deploy dir not found: $TEMP_NEW_VERSION_DEPLOY_DIR"
+    echo "❌ deploy_app: Temp deploy dir not found: $TEMP_NEW_VERSION_DEPLOY_DIR"
     exit 1
   fi
 
@@ -99,7 +103,7 @@ deploy_app() {
     docker-compose -f "$COMPOSE_FILE" pull
 
     echo "Starting containers..."
-    docker-compose -f "$COMPOSE_FILE" up -d
+    docker-compose -f "$COMPOSE_FILE" up -d --force-recreate
 
     echo "Cleaning up old dangling images..."
     docker image prune -f
