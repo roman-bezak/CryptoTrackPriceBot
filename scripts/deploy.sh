@@ -87,6 +87,7 @@ deploy_app() {
   local COMPOSE_FILE="${APP_DIR}/docker-compose.yml"
   local TEMP_NEW_VERSION_DEPLOY_DIR="${VPS_WORKDIR}/${VPS_TEMP_DEPLOY_DIR}"
 
+  # TODO: remove cuurent files except static db before copy new version
   if [ -d "$TEMP_NEW_VERSION_DEPLOY_DIR" ]; then
     cp -r "${TEMP_NEW_VERSION_DEPLOY_DIR}/." "${APP_DIR}" || {
       echo "❌ deploy_app: Copy failed"

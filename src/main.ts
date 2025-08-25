@@ -1,3 +1,4 @@
+import { PrismaClient } from '@prisma/client';
 import { Telegraf } from 'telegraf';
 
 import { config } from './config/ConfigService.js';
@@ -8,6 +9,26 @@ console.log('🚀 Starting CryptoTrackPriceBot...');
 
 // === Init bot ===
 const bot = new Telegraf(config.get('BOT_TOKEN'));
+
+const prisma = new PrismaClient();
+
+bot.command('users', async ctx => {
+  try {
+    const users = await prisma.user.findMany();
+    if (users.length === 0) {
+      await ctx.reply('🙁 В базе нет пользователей.');
+      return;
+    }
+    let message = '👥 Пользователи:\n\n';
+    for (const user of users) {
+      message += `ID: ${user.id}\nChat ID: ${user.chatId}\nСоздан: ${user.createdAt.toISOString()}\n\n`;
+    }
+    await ctx.reply(message.trim());
+  } catch (error) {
+    console.error('Ошибка при получении пользователей:', error);
+    await ctx.reply('❌ Ошибка при получении пользователей из базы.');
+  }
+});
 
 // === Commands ===
 bot.start(ctx => ctx.reply('🤖 Welcome to CryptoTrackPriceBot! v1.0.0'));
