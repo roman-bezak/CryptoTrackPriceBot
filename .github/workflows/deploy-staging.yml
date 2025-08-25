@@ -15,6 +15,8 @@ env:
   DEPLOY_ENV: ${{ vars.DEPLOY_ENV }}
   VPS_WORKDIR: ${{ vars.VPS_WORKDIR }}
   VPS_TEMP_DEPLOY_DIR: ${{ vars.VPS_TEMP_DEPLOY_DIR }}
+  VPS_APP_FOLDER: ${{ vars.VPS_APP_FOLDER }}
+  VPS_BACKUPS_FOLDER: ${{ vars.VPS_BACKUPS_FOLDER }}
 
   # Secrets
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -33,24 +35,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Log in to DockerHub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ env.DOCKERHUB_USERNAME }}
-          password: ${{ env.DOCKERHUB_TOKEN }}
+      # - name: Log in to DockerHub
+      #   uses: docker/login-action@v3
+      #   with:
+      #     username: ${{ env.DOCKERHUB_USERNAME }}
+      #     password: ${{ env.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v6
-        env:
-          DOCKER_BUILD_SUMMARY: false
-          DOCKER_BUILD_RECORD_UPLOAD: false
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: |
-            ${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPO_NAME }}:${{ env.DEPLOY_ENV }}-latest
-            ${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPO_NAME }}:${{ env.DEPLOY_ENV }}-${{ github.sha }}
+      # - name: Build and push Docker image
+      #   uses: docker/build-push-action@v6
+      #   env:
+      #     DOCKER_BUILD_SUMMARY: false
+      #     DOCKER_BUILD_RECORD_UPLOAD: false
+      #   with:
+      #     context: .
+      #     file: ./Dockerfile
+      #     push: true
+      #     tags: |
+      #       ${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPO_NAME }}:${{ env.DEPLOY_ENV }}-latest
+      #       ${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPO_NAME }}:${{ env.DEPLOY_ENV }}-${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
@@ -77,11 +79,22 @@ jobs:
             echo "DEPLOY_ENV=${DEPLOY_ENV}"
             echo "VPS_WORKDIR=${VPS_WORKDIR}"
             echo "VPS_TEMP_DEPLOY_DIR=${VPS_TEMP_DEPLOY_DIR}"
+            echo "VPS_BACKUPS_FOLDER=${VPS_BACKUPS_FOLDER}"
+            echo "VPS_APP_FOLDER=${VPS_APP_FOLDER}"
             echo "DEPLOY_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
           } > .env
 
           ssh ${{ env.VPS_USER }}@${{ env.VPS_HOST }} "mkdir -p ${{ env.VPS_WORKDIR }}/${{ env.VPS_TEMP_DEPLOY_DIR }}"
           scp .env scripts/deploy.sh docker-compose.yml ${{ env.VPS_USER }}@${{ env.VPS_HOST }}:${{ env.VPS_WORKDIR }}/${{ env.VPS_TEMP_DEPLOY_DIR }}/
+
+      - name: Run deploy script on VPS
+        run: |
+          ssh ${{ env.VPS_USER }}@${{ env.VPS_HOST }} "
+            cd ${{ env.VPS_WORKDIR }}
+            chmod +x deploy.sh
+            ./deploy.sh
+            echo 'Deploy completed'
+          "
 
       - name: Run deploy script on VPS
         run: |
