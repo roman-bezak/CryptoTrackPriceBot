@@ -85,7 +85,6 @@ backup_app() {
 deploy_app() {
   local APP_DIR="${VPS_WORKDIR}/${VPS_APP_FOLDER}"
   local COMPOSE_FILE="${APP_DIR}/docker-compose.yml"
-
   local TEMP_NEW_VERSION_DEPLOY_DIR="${VPS_WORKDIR}/${VPS_TEMP_DEPLOY_DIR}"
 
   if [ -d "$TEMP_NEW_VERSION_DEPLOY_DIR" ]; then
@@ -116,9 +115,25 @@ deploy_app() {
 }
 
 # ------------------------------
+# Cleanup temp deploy directory safely
+# ------------------------------
+cleanup_temp_dir() {
+  local TEMP_DIR="${VPS_WORKDIR}/${VPS_TEMP_DEPLOY_DIR}"
+  if [ -d "$TEMP_DIR" ]; then
+    echo "Cleaning up temp deploy directory..."
+    cd /tmp || exit 1
+    rm -rf "$TEMP_DIR"
+    echo "✅ Temp directory removed"
+  fi
+}
+
+# ------------------------------
 # Main script execution
 # ------------------------------
 main() {
+  # Ensure temp dir is cleaned up on exit, even if deploy fails
+  trap cleanup_temp_dir EXIT
+
   load_env_local      # Load .env variables locally
   check_required_vars # Validate required variables
   stop_app            # Stop running containers

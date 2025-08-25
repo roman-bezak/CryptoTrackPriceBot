@@ -94,19 +94,9 @@ jobs:
 
       - name: Run deploy script on VPS
         run: |
-          ssh ${{ env.VPS_USER }}@${{ env.VPS_HOST }} "
+          ssh -o StrictHostKeyChecking=no ${{ env.VPS_USER }}@${{ env.VPS_HOST }} "
             cd ${{ env.VPS_WORKDIR }}/${{ env.VPS_TEMP_DEPLOY_DIR }}
             chmod +x deploy.sh
 
-            ./deploy.sh || DEPLOY_EXIT_CODE=$?
-
-            echo "Removing temp directory..."
-            rm -rf "${VPS_WORKDIR}/${VPS_TEMP_DEPLOY_DIR}"
-
-            if [ -n "$DEPLOY_EXIT_CODE" ]; then
-                echo "Deploy failed with exit code: $DEPLOY_EXIT_CODE ❌"
-                exit $DEPLOY_EXIT_CODE
-            fi
-
-            echo 'Deploy completed ✅'
+            ./deploy.sh
           "
