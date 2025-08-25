@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   crypto-track-price-bot:
     image: ${DOCKER_IMAGE:-crypto-track-price-bot:latest}

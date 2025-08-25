@@ -2,18 +2,19 @@ name: Staging Deploy
 
 on:
   push:
-    branches: [ dev ]
+    branches: [dev]
 
 concurrency:
   group: staging-deploy
   cancel-in-progress: false
 
-run-name: "🛠️ Staging Deploy - ${{ github.sha }}"
+run-name: '🛠️ Staging Deploy - ${{ github.sha }}'
 
 env:
   # Environment variables
   DEPLOY_ENV: ${{ vars.DEPLOY_ENV }}
   VPS_WORKDIR: ${{ vars.VPS_WORKDIR }}
+  VPS_TEMP_DEPLOY_DIR: ${{ vars.VPS_TEMP_DEPLOY_DIR }}
 
   # Secrets
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -55,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: staging
     needs: docker-build
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -75,11 +76,12 @@ jobs:
           {
             echo "DEPLOY_ENV=${DEPLOY_ENV}"
             echo "VPS_WORKDIR=${VPS_WORKDIR}"
+            echo "VPS_TEMP_DEPLOY_DIR=${VPS_TEMP_DEPLOY_DIR}"
             echo "DEPLOY_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
           } > .env
 
-          ssh ${{ env.VPS_USER }}@${{ env.VPS_HOST }} "mkdir -p ${{ env.VPS_WORKDIR }}"
-          scp .env scripts/deploy.sh docker-compose.yml ${{ env.VPS_USER }}@${{ env.VPS_HOST }}:${{ env.VPS_WORKDIR }}/
+          ssh ${{ env.VPS_USER }}@${{ env.VPS_HOST }} "mkdir -p ${{ env.VPS_WORKDIR }}/${{ env.VPS_TEMP_DEPLOY_DIR }}"
+          scp .env scripts/deploy.sh docker-compose.yml ${{ env.VPS_USER }}@${{ env.VPS_HOST }}:${{ env.VPS_WORKDIR }}/${{ env.VPS_TEMP_DEPLOY_DIR }}/
 
       - name: Run deploy script on VPS
         run: |
@@ -87,4 +89,5 @@ jobs:
             cd ${{ env.VPS_WORKDIR }}
             chmod +x deploy.sh
             ./deploy.sh
+            echo 'Deploy completed'
           "
