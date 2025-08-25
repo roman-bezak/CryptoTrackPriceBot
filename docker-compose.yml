@@ -1,12 +1,10 @@
 services:
   crypto-track-price-bot:
-    image: ${DOCKER_IMAGE:-crypto-track-price-bot:latest}
-    container_name: crypto-track-price-bot
+    image: ${DOCKER_IMAGE}
+    container_name: crypto-track-price-bot-${DEPLOY_ENV}
+    working_dir: /app
     env_file:
       - .env
     volumes:
-      - ${DATABASE_PATH:-./db}:/app/db
+      - ${VPS_WORKDIR}/${VPS_APP_FOLDER}/db:/app/prisma/db
     restart: unless-stopped
-    
-    # Проверяем что хост-директория существует
-    # Если нет - Docker создаст её автоматически, но лучше подготовить заранее

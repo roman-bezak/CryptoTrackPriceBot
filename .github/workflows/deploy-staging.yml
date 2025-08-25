@@ -17,6 +17,8 @@ env:
   VPS_TEMP_DEPLOY_DIR: ${{ vars.VPS_TEMP_DEPLOY_DIR }}
   VPS_APP_FOLDER: ${{ vars.VPS_APP_FOLDER }}
   VPS_BACKUPS_FOLDER: ${{ vars.VPS_BACKUPS_FOLDER }}
+  DATABASE_URL: ${{ vars.DATABASE_URL }}
+  DATABASE_NAME: ${{ vars.DATABASE_NAME }}
 
   # Secrets
   DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -82,6 +84,8 @@ jobs:
             echo "VPS_BACKUPS_FOLDER=${VPS_BACKUPS_FOLDER}"
             echo "VPS_APP_FOLDER=${VPS_APP_FOLDER}"
             echo "DEPLOY_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+            echo "DOCKER_IMAGE=${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPO_NAME }}:${{ env.DEPLOY_ENV }}-latest"
+            echo "DATABASE_URL=${{ env.DATABASE_URL }}"
           } > .env
 
           ssh ${{ env.VPS_USER }}@${{ env.VPS_HOST }} "mkdir -p ${{ env.VPS_WORKDIR }}/${{ env.VPS_TEMP_DEPLOY_DIR }}"
@@ -90,17 +94,19 @@ jobs:
       - name: Run deploy script on VPS
         run: |
           ssh ${{ env.VPS_USER }}@${{ env.VPS_HOST }} "
-            cd ${{ env.VPS_WORKDIR }}
+            cd ${{ env.VPS_WORKDIR }}/${{ env.VPS_TEMP_DEPLOY_DIR }}
             chmod +x deploy.sh
-            ./deploy.sh
-            echo 'Deploy completed'
-          "
 
-      - name: Run deploy script on VPS
-        run: |
-          ssh ${{ env.VPS_USER }}@${{ env.VPS_HOST }} "
-            cd ${{ env.VPS_WORKDIR }}
-            chmod +x deploy.sh
             ./deploy.sh
-            echo 'Deploy completed'
+            DEPLOY_EXIT_CODE=$?
+
+            echo 'Removing temp directory...'
+            rm -rf ${{ env.VPS_WORKDIR }}/${{ env.VPS_TEMP_DEPLOY_DIR }}
+
+            if [ $DEPLOY_EXIT_CODE -ne 0 ]; then
+                echo 'Deploy failed with exit code: $DEPLOY_EXIT_CODE ❌'
+                exit $DEPLOY_EXIT_CODE
+            fi
+
+            echo 'Deploy completed ✅'
           "
