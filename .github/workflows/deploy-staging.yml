@@ -26,6 +26,7 @@ env:
   VPS_HOST: ${{ secrets.VPS_HOST }}
   VPS_USER: ${{ secrets.VPS_USER }}
   VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+  BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
 
 jobs:
   docker-build:
@@ -85,6 +86,7 @@ jobs:
             echo "DEPLOY_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
             echo "DOCKER_IMAGE=${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPO_NAME }}:${{ env.DEPLOY_ENV }}-latest"
             echo "DATABASE_URL=${{ env.DATABASE_URL }}"
+            echo "BOT_TOKEN=${{ env.BOT_TOKEN }}"
           } > .env
 
           ssh ${{ env.VPS_USER }}@${{ env.VPS_HOST }} "mkdir -p ${{ env.VPS_WORKDIR }}/${{ env.VPS_TEMP_DEPLOY_DIR }}"
