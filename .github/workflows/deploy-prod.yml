@@ -87,6 +87,7 @@ jobs:
             echo "DEPLOY_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
             echo "DOCKER_IMAGE=${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPO_NAME }}:${{ env.DEPLOY_ENV }}-${{ github.ref_name }}"
             echo "DATABASE_URL=${{ env.DATABASE_URL }}"
+            echo "PRISMA_STUDIO_PORT=${{ secrets.PRISMA_STUDIO_PORT }}"
             echo "BOT_TOKEN=${{ env.BOT_TOKEN }}"
           } > .env
 
