@@ -5,6 +5,8 @@ on:
     tags:
       - "v*.*.*"
 
+run-name: '📄 Publish Release - ${{ github.ref_name }}'
+
 jobs:
   release:
     runs-on: ubuntu-latest
