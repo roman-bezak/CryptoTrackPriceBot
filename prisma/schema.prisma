@@ -9,6 +9,6 @@ datasource db {
 
 model User {
   id        Int      @id @default(autoincrement())
-  chatId String   @unique
+  chatId    String   @unique
   createdAt DateTime @default(now())
 }
