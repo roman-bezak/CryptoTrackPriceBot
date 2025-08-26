@@ -27,6 +27,11 @@ else
   echo "⚠️  DATABASE_URL not set, skipping migrations"
 fi
 
+echo "🌐 Starting Prisma Studio..."
+npx prisma studio --port 5555 &
+STUDIO_PID=$!
+echo "Prisma Studio PID: $STUDIO_PID"
+
 # Start the application
 echo "🤖 Starting the bot from image..."
 exec npm run start:prod
