@@ -1,7 +1,7 @@
 services:
-  crypto-track-price-bot-${DEPLOY_ENV}-service:
+  crypto-track-price-bot-staging-service:
     image: ${DOCKER_IMAGE}
-    container_name: crypto-track-price-bot-${DEPLOY_ENV}
+    container_name: crypto-track-price-bot-staging
     working_dir: /app
     ports:
       - "${PRISMA_STUDIO_PORT}:5555"

@@ -37,7 +37,7 @@ check_required_vars() {
 # ------------------------------
 stop_app() {
   local APP_DIR="${VPS_WORKDIR}/${VPS_APP_FOLDER}"
-  local COMPOSE_FILE="${APP_DIR}/docker-compose.yml"
+  local COMPOSE_FILE="${APP_DIR}/docker-compose-${DEPLOY_ENV}.yml"
 
   if [ -d "$APP_DIR" ] && [ -f "$COMPOSE_FILE" ]; then
     echo "Stopping app $VPS_APP_FOLDER..."
@@ -84,7 +84,7 @@ backup_app() {
 # ------------------------------
 deploy_app() {
   local APP_DIR="${VPS_WORKDIR}/${VPS_APP_FOLDER}"
-  local COMPOSE_FILE="${APP_DIR}/docker-compose.yml"
+  local COMPOSE_FILE="${APP_DIR}/docker-compose-${DEPLOY_ENV}.yml"
   local TEMP_NEW_VERSION_DEPLOY_DIR="${VPS_WORKDIR}/${VPS_TEMP_DEPLOY_DIR}"
 
   if [ -d "$TEMP_NEW_VERSION_DEPLOY_DIR" ]; then
@@ -113,7 +113,7 @@ deploy_app() {
 
     echo "✅ Deployment completed successfully"
   else
-    echo "❌ deploy_app: App folder or docker-compose.yml not found in ${APP_DIR}"
+    echo "❌ deploy_app: App folder or docker-compose-${DEPLOY_ENV}.yml not found in ${APP_DIR}"
     exit 1
   fi
 }
