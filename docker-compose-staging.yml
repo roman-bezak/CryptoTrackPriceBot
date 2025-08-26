@@ -1,0 +1,12 @@
+services:
+  crypto-track-price-bot-staging-service:
+    image: ${DOCKER_IMAGE}
+    container_name: crypto-track-price-bot-staging
+    working_dir: /app
+    ports:
+      - "${PRISMA_STUDIO_PORT}:5555"
+    env_file:
+      - .env
+    volumes:
+      - ${VPS_WORKDIR}/${VPS_APP_FOLDER}/db:/app/prisma/db
+    restart: unless-stopped

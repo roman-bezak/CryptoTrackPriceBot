@@ -4,11 +4,11 @@ generator client {
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  url      = env("DATABASE_URL")
 }
 
 model User {
   id        Int      @id @default(autoincrement())
-  chatId String   @unique
+  chatId    String   @unique
   createdAt DateTime @default(now())
 }

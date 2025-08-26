@@ -1,34 +1,70 @@
+import { PrismaClient } from '@prisma/client';
 import { Telegraf } from 'telegraf';
 
-import { test } from './test.js';
+import { config } from './config/ConfigService.js';
 
-// Mock config with fake token
-const config = {
-  BOT_TOKEN: 'mock_bot_token_1234567890:ABCDEFGHIJKLMNOPQRSTUVWXYZabcdef',
-  NODE_ENV: 'development',
-};
+// === Initial logs ===
+console.log(`🌍 NODE_ENV: ${config.get('NODE_ENV')}`);
+console.log('🚀 Starting CryptoTrackPriceBot...');
 
-console.log(test, process.env.NODE_ENV);
+// === Init bot ===
+const bot = new Telegraf(config.get('BOT_TOKEN'));
 
-const bot = new Telegraf(config.BOT_TOKEN);
+const prisma = new PrismaClient();
 
-bot.start(ctx => {
-  ctx.reply('🤖 Bot started with mock token');
+bot.command('users', async ctx => {
+  try {
+    const users = await prisma.user.findMany();
+    if (users.length === 0) {
+      await ctx.reply('🙁 В базе нет пользователей.');
+      return;
+    }
+    let message = '👥 Пользователи:\n\n';
+    for (const user of users) {
+      message += `ID: ${user.id}\nChat ID: ${user.chatId}\nСоздан: ${user.createdAt.toISOString()}\n\n`;
+    }
+    await ctx.reply(message.trim());
+  } catch (error) {
+    console.error('Ошибка при получении пользователей:', error);
+    await ctx.reply('❌ Ошибка при получении пользователей из базы.');
+  }
 });
 
-// Launch bot
-bot
-  .launch()
-  .then(() => console.log('🚀 Bot launched with mock token'))
-  .catch(() => {
-    process.exit(1);
-  });
+// === Commands ===
+bot.start(ctx => ctx.reply('🤖 Welcome to CryptoTrackPriceBot! v1.0.0'));
+bot.help(ctx => ctx.reply('📚 Available commands:\n/start - Start the bot\n/help - Show this help'));
 
-// Graceful shutdown
-const gracefulShutdown = (signal: any) => {
+// === Runtime error handler ===
+bot.catch((err, ctx) => {
+  console.error(`❌ Error in update type ${ctx.updateType}`, err);
+});
+
+// === Launch bot ===
+try {
+  bot.launch({ dropPendingUpdates: true }, () => {
+    console.log('✅ Bot successfully launched!');
+  });
+} catch (error) {
+  console.error('❌ Failed to launch bot:', error);
+  process.exit(1);
+}
+
+// === Graceful shutdown ===
+const gracefulShutdown = (signal: string) => {
+  console.log(`\n🛑 Received ${signal}, stopping bot...`);
   bot.stop(signal);
+  console.log('✅ Bot stopped gracefully');
   process.exit(0);
 };
 
 process.once('SIGINT', () => gracefulShutdown('SIGINT'));
 process.once('SIGTERM', () => gracefulShutdown('SIGTERM'));
+
+// === Global error handlers (last resort) ===
+process.on('uncaughtException', error => {
+  console.error('💥 Uncaught Exception:', error);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('💥 Unhandled Rejection at:', promise, 'reason:', reason);
+});
