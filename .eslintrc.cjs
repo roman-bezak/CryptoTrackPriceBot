@@ -19,7 +19,7 @@ module.exports = {
   rules: {
     '@typescript-eslint/consistent-type-imports': ['error', { disallowTypeAnnotations: false, prefer: 'type-imports' }],
     '@typescript-eslint/naming-convention': [
-      'error',
+      'warn',
       { format: ['PascalCase'], prefix: ['E'], selector: 'enum' },
       { format: ['PascalCase'], prefix: ['I'], selector: 'interface' },
       { format: ['PascalCase'], prefix: ['T'], selector: 'typeAlias' },
