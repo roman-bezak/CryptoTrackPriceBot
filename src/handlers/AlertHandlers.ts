@@ -66,13 +66,13 @@ export class AlertHandlers {
         return;
       }
 
-      // Создать оповещение
-      // const alert = await alertService.createAlert({
-      //   chatId: ctx.chat?.id?.toString() || '',
-      //   symbol: symbol.toUpperCase(),
-      //   targetPrice,
-      //   condition: condition as 'above' | 'below',
-      // });
+      //Создать оповещение
+      await alertService.createAlert({
+        chatId: ctx.chat?.id?.toString() || '',
+        symbol: symbol.toUpperCase(),
+        targetPrice,
+        condition: condition as 'above' | 'below',
+      });
 
       // Отправить подтверждение
       await this.notificationService.sendAlertCreatedNotification(
