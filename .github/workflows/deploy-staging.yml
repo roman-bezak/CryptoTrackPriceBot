@@ -91,7 +91,7 @@ jobs:
           } > .env
 
           ssh ${{ env.VPS_USER }}@${{ env.VPS_HOST }} "mkdir -p ${{ env.VPS_WORKDIR }}/${{ env.VPS_TEMP_DEPLOY_DIR }}"
-          scp .env scripts/deploy.sh docker-compose.yml ${{ env.VPS_USER }}@${{ env.VPS_HOST }}:${{ env.VPS_WORKDIR }}/${{ env.VPS_TEMP_DEPLOY_DIR }}/
+          scp .env scripts/deploy.sh docker-compose-${DEPLOY_ENV}.yml ${{ env.VPS_USER }}@${{ env.VPS_HOST }}:${{ env.VPS_WORKDIR }}/${{ env.VPS_TEMP_DEPLOY_DIR }}/
 
       - name: Run deploy script on VPS
         run: |
