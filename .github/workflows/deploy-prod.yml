@@ -1,14 +1,15 @@
-name: Staging Deploy
+name: Production Deploy
 
 on:
   push:
-    branches: [dev]
+    tags:
+      - "v*.*.*"
 
 concurrency:
   group: deploy
   cancel-in-progress: false
 
-run-name: '🛠️ Staging Deploy - ${{ github.sha }}'
+run-name: '🔥 Production Deploy - ${{ github.ref_name }}'
 
 env:
   # Environment variables
@@ -31,7 +32,7 @@ env:
 jobs:
   docker-build:
     runs-on: ubuntu-latest
-    environment: staging
+    environment: production
 
     steps:
       - name: Checkout repository
@@ -54,11 +55,11 @@ jobs:
           push: true
           tags: |
             ${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPO_NAME }}:${{ env.DEPLOY_ENV }}-latest
-            ${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPO_NAME }}:${{ env.DEPLOY_ENV }}-${{ github.sha }}
+            ${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPO_NAME }}:${{ env.DEPLOY_ENV }}-${{ github.ref_name }}
 
   deploy:
     runs-on: ubuntu-latest
-    environment: staging
+    environment: production
     needs: docker-build
 
     steps:
@@ -84,7 +85,7 @@ jobs:
             echo "VPS_BACKUPS_FOLDER=${VPS_BACKUPS_FOLDER}"
             echo "VPS_APP_FOLDER=${VPS_APP_FOLDER}"
             echo "DEPLOY_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
-            echo "DOCKER_IMAGE=${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPO_NAME }}:${{ env.DEPLOY_ENV }}-latest"
+            echo "DOCKER_IMAGE=${{ env.DOCKERHUB_USERNAME }}/${{ env.DOCKERHUB_REPO_NAME }}:${{ env.DEPLOY_ENV }}-${{ github.ref_name }}"
             echo "DATABASE_URL=${{ env.DATABASE_URL }}"
             echo "BOT_TOKEN=${{ env.BOT_TOKEN }}"
           } > .env
