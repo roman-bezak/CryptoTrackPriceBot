@@ -1,7 +1,8 @@
 import { cryptoPriceService } from './CryptoPriceService.js';
 
-import type { AlertWithUser } from './AlertService.js';
-import type { CryptoPrice } from './CryptoPriceService.js';
+import type { IAlertWithUser } from './AlertService.js';
+import type { ICryptoPrice } from './CryptoPriceService.js';
+import type { PriceAlert } from '@prisma/client';
 import type { Telegraf } from 'telegraf';
 
 export class NotificationService {
@@ -23,37 +24,37 @@ export class NotificationService {
   }
 
   /**
-   * Отправить уведомление о сработавшем оповещении
+   * Send triggered alert notification
    */
-  public async sendPriceAlertNotification(alert: AlertWithUser, currentPrice: CryptoPrice): Promise<void> {
+  public async sendPriceAlertNotification(alert: IAlertWithUser, currentPrice: ICryptoPrice): Promise<void> {
     try {
       const coinName = cryptoPriceService.getCoinName(alert.symbol);
-      const conditionText = alert.condition === 'above' ? 'выше' : 'ниже';
+      const conditionText = alert.condition === 'above' ? 'above' : 'below';
       const changeEmoji = currentPrice.change24h >= 0 ? '📈' : '📉';
       const changeText = currentPrice.change24h >= 0 ? '+' : '';
 
-      const message = `🚨 *Оповещение о цене сработало!*
+      const message = `🚨 *Price alert triggered!*
 
 💰 *${coinName} (${alert.symbol})*
-💵 Текущая цена: $${currentPrice.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-🎯 Целевая цена: $${alert.targetPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${conditionText})
-${changeEmoji} Изменение за 24ч: ${changeText}${currentPrice.change24h.toFixed(2)}%
-🕐 Обновлено: ${currentPrice.lastUpdated.toLocaleString('ru-RU')}
+💵 Current price: $${currentPrice.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+🎯 Target price: $${alert.targetPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${conditionText})
+${changeEmoji} 24h Change: ${changeText}${currentPrice.change24h.toFixed(2)}%
+🕐 Updated: ${currentPrice.lastUpdated.toLocaleString('ru-RU')}
 
-✅ Оповещение автоматически отключено.`;
+✅ Alert automatically disabled.`;
 
       await this.bot.telegram.sendMessage(alert.user.chatId, message, {
         parse_mode: 'Markdown',
       });
 
-      console.log(`✅ Уведомление отправлено пользователю ${alert.user.chatId} для ${alert.symbol}`);
+      console.log(`✅ Notification sent to user ${alert.user.chatId} for ${alert.symbol}`);
     } catch (error) {
-      console.error(`❌ Ошибка при отправке уведомления пользователю ${alert.user.chatId}:`, error);
+      console.error(`❌ Error sending notification to user ${alert.user.chatId}:`, error);
     }
   }
 
   /**
-   * Отправить подтверждение создания оповещения
+   * Send alert creation confirmation
    */
   public async sendAlertCreatedNotification(
     chatId: string,
@@ -63,131 +64,131 @@ ${changeEmoji} Изменение за 24ч: ${changeText}${currentPrice.change2
   ): Promise<void> {
     try {
       const coinName = cryptoPriceService.getCoinName(symbol);
-      const conditionText = condition === 'above' ? 'выше' : 'ниже';
+      const conditionText = condition === 'above' ? 'above' : 'below';
 
-      const message = `✅ *Оповещение создано!*
+      const message = `✅ *Alert created!*
 
 💰 *${coinName} (${symbol})*
-🎯 Уведомление при цене ${conditionText} $${targetPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+🎯 Notification when price is ${conditionText} $${targetPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
 
-Используйте /alerts для просмотра всех ваших оповещений.`;
+Use /alerts to view all your alerts.`;
 
       await this.bot.telegram.sendMessage(chatId, message, {
         parse_mode: 'Markdown',
       });
     } catch (error) {
-      console.error(`❌ Ошибка при отправке подтверждения пользователю ${chatId}:`, error);
+      console.error(`❌ Error sending confirmation to user ${chatId}:`, error);
     }
   }
 
   /**
-   * Отправить список оповещений пользователя
+   * Send user's alerts list
    */
-  public async sendAlertsList(chatId: string, alerts: any[]): Promise<void> {
+  public async sendAlertsList(chatId: string, alerts: PriceAlert[]): Promise<void> {
     try {
       if (alerts.length === 0) {
         await this.bot.telegram.sendMessage(
           chatId,
-          '📝 У вас пока нет активных оповещений.\n\nИспользуйте /setalert для создания нового оповещения.',
+          '📝 You have no active alerts yet.\n\nUse /setalert to create a new alert.',
         );
         return;
       }
 
-      let message = '📝 *Ваши активные оповещения:*\n\n';
+      let message = '📝 *Your active alerts:*\n\n';
 
       for (const alert of alerts) {
         const coinName = cryptoPriceService.getCoinName(alert.symbol);
-        const conditionText = alert.condition === 'above' ? 'выше' : 'ниже';
+        const conditionText = alert.condition === 'above' ? 'above' : 'below';
         const date = new Date(alert.createdAt).toLocaleDateString('ru-RU');
 
         message += `💰 *${coinName} (${alert.symbol})*\n`;
         message += `🎯 ${conditionText} $${alert.targetPrice.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}\n`;
-        message += `📅 Создано: ${date}\n`;
+        message += `📅 Created: ${date}\n`;
         message += `🆔 ID: \`${alert.id}\`\n\n`;
       }
 
-      message += 'Для удаления оповещения используйте /deletealert <ID>';
+      message += 'To delete an alert use /deletealert <ID>';
 
       await this.bot.telegram.sendMessage(chatId, message, {
         parse_mode: 'Markdown',
       });
     } catch (error) {
-      console.error(`❌ Ошибка при отправке списка оповещений пользователю ${chatId}:`, error);
+      console.error(`❌ Error sending alerts list to user ${chatId}:`, error);
     }
   }
 
   /**
-   * Отправить подтверждение удаления оповещения
+   * Send alert deletion confirmation
    */
   public async sendAlertDeletedNotification(chatId: string, alertId: number): Promise<void> {
     try {
-      const message = `✅ Оповещение с ID \`${alertId}\` успешно удалено.`;
+      const message = `✅ Alert with ID \`${alertId}\` successfully deleted.`;
 
       await this.bot.telegram.sendMessage(chatId, message, {
         parse_mode: 'Markdown',
       });
     } catch (error) {
-      console.error(`❌ Ошибка при отправке подтверждения удаления пользователю ${chatId}:`, error);
+      console.error(`❌ Error sending deletion confirmation to user ${chatId}:`, error);
     }
   }
 
   /**
-   * Отправить сообщение об ошибке
+   * Send error message
    */
   public async sendErrorMessage(chatId: string, errorMessage: string): Promise<void> {
     try {
-      const message = `❌ *Ошибка:* ${errorMessage}`;
+      const message = `❌ *Error:* ${errorMessage}`;
 
       await this.bot.telegram.sendMessage(chatId, message, {
         parse_mode: 'Markdown',
       });
     } catch (error) {
-      console.error(`❌ Ошибка при отправке сообщения об ошибке пользователю ${chatId}:`, error);
+      console.error(`❌ Error sending error message to user ${chatId}:`, error);
     }
   }
 
   /**
-   * Отправить статистику оповещений
+   * Send alert statistics
    */
   public async sendAlertStats(
     chatId: string,
     stats: { total: number; active: number; triggered: number },
   ): Promise<void> {
     try {
-      const message = `📊 *Статистика ваших оповещений:*
+      const message = `📊 *Your alert statistics:*
 
-📝 Всего создано: ${stats.total}
-✅ Активных: ${stats.active}
-🚨 Сработало: ${stats.triggered}`;
+📝 Total created: ${stats.total}
+✅ Active: ${stats.active}
+🚨 Triggered: ${stats.triggered}`;
 
       await this.bot.telegram.sendMessage(chatId, message, {
         parse_mode: 'Markdown',
       });
     } catch (error) {
-      console.error(`❌ Ошибка при отправке статистики пользователю ${chatId}:`, error);
+      console.error(`❌ Error sending statistics to user ${chatId}:`, error);
     }
   }
 
   /**
-   * Отправить список поддерживаемых криптовалют
+   * Send list of supported cryptocurrencies
    */
   public async sendSupportedSymbols(chatId: string): Promise<void> {
     try {
       const symbols = cryptoPriceService.getSupportedSymbols();
-      let message = '💰 *Поддерживаемые криптовалюты:*\n\n';
+      let message = '💰 *Supported cryptocurrencies:*\n\n';
 
       for (const symbol of symbols) {
         const coinName = cryptoPriceService.getCoinName(symbol);
         message += `• ${coinName} (${symbol})\n`;
       }
 
-      message += '\nИспользуйте символ валюты при создании оповещения.';
+      message += '\nUse the currency symbol when creating alerts.';
 
       await this.bot.telegram.sendMessage(chatId, message, {
         parse_mode: 'Markdown',
       });
     } catch (error) {
-      console.error(`❌ Ошибка при отправке списка символов пользователю ${chatId}:`, error);
+      console.error(`❌ Error sending symbols list to user ${chatId}:`, error);
     }
   }
 }

@@ -12,9 +12,9 @@ export class AlertHandlers {
   }
 
   /**
-   * Обработчик команды /setalert
-   * Формат: /setalert <symbol> <price> <condition>
-   * Пример: /setalert BTC 50000 above
+   * Handler for /setalert command
+   * Format: /setalert <symbol> <price> <condition>
+   * Example: /setalert BTC 50000 above
    */
   public async handleSetAlert(ctx: Context): Promise<void> {
     try {
@@ -37,7 +37,7 @@ export class AlertHandlers {
       const [, symbol, priceStr, condition] = parts;
       const targetPrice = parseFloat(priceStr);
 
-      // Валидация
+      // Validation
       if (isNaN(targetPrice) || targetPrice <= 0) {
         await this.notificationService.sendErrorMessage(
           ctx.chat?.id?.toString() || '',
@@ -54,7 +54,7 @@ export class AlertHandlers {
         return;
       }
 
-      // Проверить, поддерживается ли символ
+      // Check if symbol is supported
       const supportedSymbols = cryptoPriceService.getSupportedSymbols();
       const coinId = cryptoPriceService.getCoinId(symbol);
 
@@ -66,7 +66,7 @@ export class AlertHandlers {
         return;
       }
 
-      //Создать оповещение
+      // Create alert
       await alertService.createAlert({
         chatId: ctx.chat?.id?.toString() || '',
         symbol: symbol.toUpperCase(),
@@ -74,7 +74,7 @@ export class AlertHandlers {
         condition: condition as 'above' | 'below',
       });
 
-      // Отправить подтверждение
+      // Send confirmation
       await this.notificationService.sendAlertCreatedNotification(
         ctx.chat?.id?.toString() || '',
         symbol.toUpperCase(),
@@ -82,9 +82,9 @@ export class AlertHandlers {
         condition as 'above' | 'below',
       );
     } catch (error) {
-      console.error('Ошибка при создании оповещения:', error);
+      console.error('Error creating alert:', error);
 
-      if (error instanceof Error && error.message === 'Такое оповещение уже существует') {
+      if (error instanceof Error && error.message === 'Such alert already exists') {
         await this.notificationService.sendErrorMessage(
           ctx.chat?.id?.toString() || '',
           'Такое оповещение уже существует. Используйте /alerts для просмотра ваших оповещений.',
@@ -99,7 +99,7 @@ export class AlertHandlers {
   }
 
   /**
-   * Обработчик команды /alerts
+   * Handler for /alerts command
    */
   public async handleGetAlerts(ctx: Context): Promise<void> {
     try {
@@ -108,7 +108,7 @@ export class AlertHandlers {
 
       await this.notificationService.sendAlertsList(chatId, alerts);
     } catch (error) {
-      console.error('Ошибка при получении оповещений:', error);
+      console.error('Error getting alerts:', error);
       await this.notificationService.sendErrorMessage(
         ctx.chat?.id?.toString() || '',
         'Произошла ошибка при получении оповещений. Попробуйте позже.',
@@ -117,8 +117,8 @@ export class AlertHandlers {
   }
 
   /**
-   * Обработчик команды /deletealert
-   * Формат: /deletealert <id>
+   * Handler for /deletealert command
+   * Format: /deletealert <id>
    */
   public async handleDeleteAlert(ctx: Context): Promise<void> {
     try {
@@ -160,7 +160,7 @@ export class AlertHandlers {
         );
       }
     } catch (error) {
-      console.error('Ошибка при удалении оповещения:', error);
+      console.error('Error deleting alert:', error);
       await this.notificationService.sendErrorMessage(
         ctx.chat?.id?.toString() || '',
         'Произошла ошибка при удалении оповещения. Попробуйте позже.',
@@ -169,7 +169,7 @@ export class AlertHandlers {
   }
 
   /**
-   * Обработчик команды /stats
+   * Handler for /stats command
    */
   public async handleGetStats(ctx: Context): Promise<void> {
     try {
@@ -178,7 +178,7 @@ export class AlertHandlers {
 
       await this.notificationService.sendAlertStats(chatId, stats);
     } catch (error) {
-      console.error('Ошибка при получении статистики:', error);
+      console.error('Error getting statistics:', error);
       await this.notificationService.sendErrorMessage(
         ctx.chat?.id?.toString() || '',
         'Произошла ошибка при получении статистики. Попробуйте позже.',
@@ -187,13 +187,13 @@ export class AlertHandlers {
   }
 
   /**
-   * Обработчик команды /symbols
+   * Handler for /symbols command
    */
   public async handleGetSymbols(ctx: Context): Promise<void> {
     try {
       await this.notificationService.sendSupportedSymbols(ctx.chat?.id?.toString() || '');
     } catch (error) {
-      console.error('Ошибка при получении списка символов:', error);
+      console.error('Error getting symbols list:', error);
       await this.notificationService.sendErrorMessage(
         ctx.chat?.id?.toString() || '',
         'Произошла ошибка при получении списка символов. Попробуйте позже.',
@@ -202,8 +202,8 @@ export class AlertHandlers {
   }
 
   /**
-   * Обработчик команды /price
-   * Формат: /price <symbol>
+   * Handler for /price command
+   * Format: /price <symbol>
    */
   public async handleGetPrice(ctx: Context): Promise<void> {
     try {
@@ -240,13 +240,13 @@ export class AlertHandlers {
 
       const messageText = `💰 *${coinName} (${price.symbol})*
 
-💵 Цена: $${price.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-${changeEmoji} Изменение за 24ч: ${changeText}${price.change24h.toFixed(2)}%
-🕐 Обновлено: ${price.lastUpdated.toLocaleString('ru-RU')}`;
+💵 Price: $${price.price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+${changeEmoji} 24h Change: ${changeText}${price.change24h.toFixed(2)}%
+🕐 Updated: ${price.lastUpdated.toLocaleString('ru-RU')}`;
 
       await ctx.reply(messageText, { parse_mode: 'Markdown' });
     } catch (error) {
-      console.error('Ошибка при получении цены:', error);
+      console.error('Error getting price:', error);
       await this.notificationService.sendErrorMessage(
         ctx.chat?.id?.toString() || '',
         'Произошла ошибка при получении цены. Попробуйте позже.',

@@ -2,17 +2,17 @@ import { PrismaClient } from '@prisma/client';
 
 import { cryptoPriceService } from './CryptoPriceService.js';
 
-import type { CryptoPrice } from './CryptoPriceService.js';
+import type { ICryptoPrice } from './CryptoPriceService.js';
 import type { PriceAlert, User } from '@prisma/client';
 
-export interface CreateAlertData {
+export interface ICreateAlertData {
   chatId: string;
   symbol: string;
   targetPrice: number;
   condition: 'above' | 'below';
 }
 
-export interface AlertWithUser extends PriceAlert {
+export interface IAlertWithUser extends PriceAlert {
   user: User;
 }
 
@@ -32,17 +32,17 @@ export class AlertService {
   }
 
   /**
-   * Создать новое оповещение
+   * Create new alert
    */
-  public async createAlert(data: CreateAlertData): Promise<PriceAlert> {
-    // Найти или создать пользователя
+  public async createAlert(data: ICreateAlertData): Promise<PriceAlert> {
+    // Find or create user
     const user = await this.prisma.user.upsert({
       where: { chatId: data.chatId },
       update: {},
       create: { chatId: data.chatId },
     });
 
-    // Проверить, не существует ли уже такое оповещение
+    // Check if such alert already exists
     const existingAlert = await this.prisma.priceAlert.findFirst({
       where: {
         userId: user.id,
@@ -54,10 +54,10 @@ export class AlertService {
     });
 
     if (existingAlert) {
-      throw new Error('Такое оповещение уже существует');
+      throw new Error('Such alert already exists');
     }
 
-    // Создать новое оповещение
+    // Create new alert
     return await this.prisma.priceAlert.create({
       data: {
         userId: user.id,
@@ -70,7 +70,7 @@ export class AlertService {
   }
 
   /**
-   * Получить все активные оповещения пользователя
+   * Get all active user alerts
    */
   public async getUserAlerts(chatId: string): Promise<PriceAlert[]> {
     const user = await this.prisma.user.findUnique({
@@ -93,9 +93,9 @@ export class AlertService {
   }
 
   /**
-   * Получить все активные оповещения
+   * Get all active alerts
    */
-  public async getAllActiveAlerts(): Promise<AlertWithUser[]> {
+  public async getAllActiveAlerts(): Promise<IAlertWithUser[]> {
     return await this.prisma.priceAlert.findMany({
       where: {
         isActive: true,
@@ -107,7 +107,7 @@ export class AlertService {
   }
 
   /**
-   * Удалить оповещение
+   * Delete alert
    */
   public async deleteAlert(chatId: string, alertId: number): Promise<boolean> {
     const user = await this.prisma.user.findUnique({
@@ -129,7 +129,7 @@ export class AlertService {
   }
 
   /**
-   * Отключить оповещение
+   * Deactivate alert
    */
   public async deactivateAlert(alertId: number): Promise<void> {
     await this.prisma.priceAlert.update({
@@ -142,14 +142,14 @@ export class AlertService {
   }
 
   /**
-   * Проверить все активные оповещения
+   * Check all active alerts
    */
-  public async checkAllAlerts(): Promise<Array<{ alert: AlertWithUser; currentPrice: CryptoPrice }>> {
+  public async checkAllAlerts(): Promise<Array<{ alert: IAlertWithUser; currentPrice: ICryptoPrice }>> {
     const alerts = await this.getAllActiveAlerts();
-    const triggeredAlerts: Array<{ alert: AlertWithUser; currentPrice: CryptoPrice }> = [];
+    const triggeredAlerts: Array<{ alert: IAlertWithUser; currentPrice: ICryptoPrice }> = [];
 
-    // Группируем оповещения по символам для оптимизации запросов
-    const symbolGroups = new Map<string, AlertWithUser[]>();
+    // Group alerts by symbols for request optimization
+    const symbolGroups = new Map<string, IAlertWithUser[]>();
     for (const alert of alerts) {
       const symbol = alert.symbol;
       if (!symbolGroups.has(symbol)) {
@@ -158,7 +158,7 @@ export class AlertService {
       symbolGroups.get(symbol)!.push(alert);
     }
 
-    // Проверяем каждую группу
+    // Check each group
     for (const [symbol, symbolAlerts] of symbolGroups) {
       const currentPrice = await cryptoPriceService.getPrice(symbol);
 
@@ -183,7 +183,7 @@ export class AlertService {
   }
 
   /**
-   * Получить статистику оповещений пользователя
+   * Get user alert statistics
    */
   public async getUserAlertStats(chatId: string): Promise<{
     total: number;
@@ -214,7 +214,7 @@ export class AlertService {
   }
 
   /**
-   * Очистить старые сработавшие оповещения (старше 30 дней)
+   * Clean up old triggered alerts (older than 30 days)
    */
   public async cleanupOldAlerts(): Promise<void> {
     const thirtyDaysAgo = new Date();
