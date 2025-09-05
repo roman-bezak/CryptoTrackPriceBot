@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export interface CryptoPrice {
+export interface ICryptoPrice {
   symbol: string;
   price: number;
   change24h: number;
@@ -21,9 +21,9 @@ export class CryptoPriceService {
   }
 
   /**
-   * Получить текущую цену криптовалюты
+   * Get current cryptocurrency price
    */
-  public async getPrice(symbol: string): Promise<CryptoPrice | null> {
+  public async getPrice(symbol: string): Promise<ICryptoPrice | null> {
     try {
       const response = await axios.get(`${this.baseUrl}/simple/price`, {
         params: {
@@ -49,16 +49,16 @@ export class CryptoPriceService {
         lastUpdated: new Date(data.last_updated_at * 1000),
       };
     } catch (error) {
-      console.error(`Ошибка при получении цены для ${symbol}:`, error);
+      console.error(`Error getting price for ${symbol}:`, error);
       return null;
     }
   }
 
   /**
-   * Получить цены для нескольких криптовалют
+   * Get prices for multiple cryptocurrencies
    */
-  public async getPrices(symbols: string[]): Promise<CryptoPrice[]> {
-    const prices: CryptoPrice[] = [];
+  public async getPrices(symbols: string[]): Promise<ICryptoPrice[]> {
+    const prices: ICryptoPrice[] = [];
 
     for (const symbol of symbols) {
       const price = await this.getPrice(symbol);
@@ -71,7 +71,7 @@ export class CryptoPriceService {
   }
 
   /**
-   * Проверить, достигла ли цена целевого уровня
+   * Check if price has reached target level
    */
   public checkPriceAlert(currentPrice: number, targetPrice: number, condition: 'above' | 'below'): boolean {
     if (condition === 'above') {
@@ -82,7 +82,7 @@ export class CryptoPriceService {
   }
 
   /**
-   * Получить список поддерживаемых криптовалют
+   * Get list of supported cryptocurrencies
    */
   public getSupportedSymbols(): string[] {
     return [
@@ -100,7 +100,7 @@ export class CryptoPriceService {
   }
 
   /**
-   * Преобразовать символ в ID для API CoinGecko
+   * Convert symbol to ID for CoinGecko API
    */
   public getCoinId(symbol: string): string {
     const symbolMap: Record<string, string> = {
@@ -120,7 +120,7 @@ export class CryptoPriceService {
   }
 
   /**
-   * Получить читаемое название криптовалюты
+   * Get readable cryptocurrency name
    */
   public getCoinName(symbol: string): string {
     const nameMap: Record<string, string> = {

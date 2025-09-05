@@ -92,38 +92,38 @@ bot.start(ctx => {
 });
 
 bot.help(ctx => {
-  const helpMessage = `📚 *Справка по командам CryptoTrackPriceBot*
+  const helpMessage = `📚 *CryptoTrackPriceBot Command Guide*
 
-🔔 *Создание оповещений:*
-/setalert <символ> <цена> <условие>
-Создает оповещение для отслеживания цены криптовалюты.
+🔔 *Creating alerts:*
+/setalert <symbol> <price> <condition>
+Creates an alert for tracking cryptocurrency price.
 
-*Параметры:*
-• символ - код криптовалюты (BTC, ETH, BNB и т.д.)
-• цена - целевая цена в долларах
-• условие - above (выше) или below (ниже)
+*Parameters:*
+• symbol - cryptocurrency code (BTC, ETH, BNB, etc.)
+• price - target price in dollars
+• condition - above or below
 
-*Примеры:*
+*Examples:*
 • /setalert BTC 50000 above
 • /setalert ETH 3000 below
 • /setalert BNB 400 above
 
-📝 *Управление оповещениями:*
-• /alerts - Показать все ваши активные оповещения
-• /deletealert <ID> - Удалить оповещение по ID
-• /stats - Показать статистику ваших оповещений
+📝 *Alert management:*
+• /alerts - Show all your active alerts
+• /deletealert <ID> - Delete alert by ID
+• /stats - Show your alert statistics
 
-📊 *Информация о ценах:*
-• /price <символ> - Показать текущую цену криптовалюты
-• /symbols - Список всех поддерживаемых криптовалют
+📊 *Price information:*
+• /price <symbol> - Show current cryptocurrency price
+• /symbols - List of all supported cryptocurrencies
 
-💡 *Как это работает:*
-1. Создайте оповещение с помощью /setalert
-2. Бот будет проверять цены каждые 5 минут
-3. Когда цена достигнет целевого уровня, вы получите уведомление
-4. Оповещение автоматически отключится после срабатывания
+💡 *How it works:*
+1. Create an alert using /setalert
+2. Bot will check prices every 5 minutes
+3. When price reaches target level, you'll receive notification
+4. Alert automatically disables after triggering
 
-🔧 *Поддерживаемые криптовалюты:*
+🔧 *Supported cryptocurrencies:*
 Bitcoin (BTC), Ethereum (ETH), Binance Coin (BNB), Cardano (ADA), Solana (SOL), Ripple (XRP), Polkadot (DOT), Dogecoin (DOGE), Avalanche (AVAX), Polygon (MATIC)`;
 
   ctx.reply(helpMessage, { parse_mode: 'Markdown' });
