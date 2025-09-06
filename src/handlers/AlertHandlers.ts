@@ -19,7 +19,7 @@ export class AlertHandlers {
   public async handleSetAlert(ctx: Context): Promise<void> {
     try {
       if (!ctx.message || !('text' in ctx.message)) {
-        await this.notificationService.sendErrorMessage(ctx.chat?.id?.toString() || '', 'Неверный тип сообщения');
+        await this.notificationService.sendErrorMessage(ctx.chat?.id?.toString() || '', 'Invalid message type');
         return;
       }
 
@@ -29,7 +29,7 @@ export class AlertHandlers {
       if (parts.length !== 4) {
         await this.notificationService.sendErrorMessage(
           ctx.chat?.id?.toString() || '',
-          'Неверный формат команды. Используйте: /setalert <символ> <цена> <условие>\n\nПример: /setalert BTC 50000 above\n\nУсловия: above (выше) или below (ниже)',
+          'Invalid command format. Use: /setalert <symbol> <price> <condition>\n\nExample: /setalert BTC 50000 above\n\nConditions: above or below',
         );
         return;
       }
@@ -41,7 +41,7 @@ export class AlertHandlers {
       if (isNaN(targetPrice) || targetPrice <= 0) {
         await this.notificationService.sendErrorMessage(
           ctx.chat?.id?.toString() || '',
-          'Неверная цена. Цена должна быть положительным числом.',
+          'Invalid price. Price must be a positive number.',
         );
         return;
       }
@@ -49,7 +49,7 @@ export class AlertHandlers {
       if (condition !== 'above' && condition !== 'below') {
         await this.notificationService.sendErrorMessage(
           ctx.chat?.id?.toString() || '',
-          'Неверное условие. Используйте "above" (выше) или "below" (ниже).',
+          'Invalid condition. Use "above" or "below".',
         );
         return;
       }
@@ -61,7 +61,7 @@ export class AlertHandlers {
       if (!supportedSymbols.includes(coinId)) {
         await this.notificationService.sendErrorMessage(
           ctx.chat?.id?.toString() || '',
-          `Неподдерживаемый символ "${symbol}". Используйте /symbols для просмотра доступных криптовалют.`,
+          `Unsupported symbol "${symbol}". Use /symbols to view available cryptocurrencies.`,
         );
         return;
       }
@@ -87,12 +87,12 @@ export class AlertHandlers {
       if (error instanceof Error && error.message === 'Such alert already exists') {
         await this.notificationService.sendErrorMessage(
           ctx.chat?.id?.toString() || '',
-          'Такое оповещение уже существует. Используйте /alerts для просмотра ваших оповещений.',
+          'Such alert already exists. Use /alerts to view your alerts.',
         );
       } else {
         await this.notificationService.sendErrorMessage(
           ctx.chat?.id?.toString() || '',
-          'Произошла ошибка при создании оповещения. Попробуйте позже.',
+          'An error occurred while creating alert. Try again later.',
         );
       }
     }
@@ -111,7 +111,7 @@ export class AlertHandlers {
       console.error('Error getting alerts:', error);
       await this.notificationService.sendErrorMessage(
         ctx.chat?.id?.toString() || '',
-        'Произошла ошибка при получении оповещений. Попробуйте позже.',
+        'An error occurred while fetching alerts. Try again later.',
       );
     }
   }
@@ -123,7 +123,7 @@ export class AlertHandlers {
   public async handleDeleteAlert(ctx: Context): Promise<void> {
     try {
       if (!ctx.message || !('text' in ctx.message)) {
-        await this.notificationService.sendErrorMessage(ctx.chat?.id?.toString() || '', 'Неверный тип сообщения');
+        await this.notificationService.sendErrorMessage(ctx.chat?.id?.toString() || '', 'Invalid message type');
         return;
       }
 
@@ -133,7 +133,7 @@ export class AlertHandlers {
       if (parts.length !== 2) {
         await this.notificationService.sendErrorMessage(
           ctx.chat?.id?.toString() || '',
-          'Неверный формат команды. Используйте: /deletealert <ID>\n\nID можно посмотреть в списке оповещений (/alerts)',
+          'Invalid command format. Use: /deletealert <ID>\n\nID can be found in alerts list (/alerts)',
         );
         return;
       }
@@ -144,7 +144,7 @@ export class AlertHandlers {
       if (isNaN(alertId) || alertId <= 0) {
         await this.notificationService.sendErrorMessage(
           ctx.chat?.id?.toString() || '',
-          'Неверный ID оповещения. ID должен быть положительным числом.',
+          'Invalid alert ID. ID must be a positive number.',
         );
         return;
       }
@@ -156,14 +156,14 @@ export class AlertHandlers {
       } else {
         await this.notificationService.sendErrorMessage(
           ctx.chat?.id?.toString() || '',
-          'Оповещение с таким ID не найдено или не принадлежит вам.',
+          'Alert with this ID not found or does not belong to you.',
         );
       }
     } catch (error) {
       console.error('Error deleting alert:', error);
       await this.notificationService.sendErrorMessage(
         ctx.chat?.id?.toString() || '',
-        'Произошла ошибка при удалении оповещения. Попробуйте позже.',
+        'An error occurred while deleting alert. Try again later.',
       );
     }
   }
@@ -181,7 +181,7 @@ export class AlertHandlers {
       console.error('Error getting statistics:', error);
       await this.notificationService.sendErrorMessage(
         ctx.chat?.id?.toString() || '',
-        'Произошла ошибка при получении статистики. Попробуйте позже.',
+        'An error occurred while fetching statistics. Try again later.',
       );
     }
   }
@@ -196,7 +196,7 @@ export class AlertHandlers {
       console.error('Error getting symbols list:', error);
       await this.notificationService.sendErrorMessage(
         ctx.chat?.id?.toString() || '',
-        'Произошла ошибка при получении списка символов. Попробуйте позже.',
+        'An error occurred while fetching symbols list. Try again later.',
       );
     }
   }
@@ -208,7 +208,7 @@ export class AlertHandlers {
   public async handleGetPrice(ctx: Context): Promise<void> {
     try {
       if (!ctx.message || !('text' in ctx.message)) {
-        await this.notificationService.sendErrorMessage(ctx.chat?.id?.toString() || '', 'Неверный тип сообщения');
+        await this.notificationService.sendErrorMessage(ctx.chat?.id?.toString() || '', 'Invalid message type');
         return;
       }
 
@@ -218,7 +218,7 @@ export class AlertHandlers {
       if (parts.length !== 2) {
         await this.notificationService.sendErrorMessage(
           ctx.chat?.id?.toString() || '',
-          'Неверный формат команды. Используйте: /price <символ>\n\nПример: /price BTC',
+          'Invalid command format. Use: /price <symbol>\n\nExample: /price BTC',
         );
         return;
       }
@@ -229,7 +229,7 @@ export class AlertHandlers {
       if (!price) {
         await this.notificationService.sendErrorMessage(
           ctx.chat?.id?.toString() || '',
-          `Не удалось получить цену для "${symbol}". Проверьте правильность символа или попробуйте позже.`,
+          `Failed to get price for "${symbol}". Check symbol correctness or try again later.`,
         );
         return;
       }
@@ -249,7 +249,7 @@ ${changeEmoji} 24h Change: ${changeText}${price.change24h.toFixed(2)}%
       console.error('Error getting price:', error);
       await this.notificationService.sendErrorMessage(
         ctx.chat?.id?.toString() || '',
-        'Произошла ошибка при получении цены. Попробуйте позже.',
+        'An error occurred while fetching price. Try again later.',
       );
     }
   }
