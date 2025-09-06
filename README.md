@@ -12,16 +12,16 @@ Telegram bot for tracking cryptocurrency prices and managing price alerts.
 
 ## 🤖 Bot Commands
 
-| Command | Description | Example |
-|---------|-------------|---------|
-| `/start` | Welcome message and overview | `/start` |
-| `/help` | Show all available commands | `/help` |
-| `/price <symbol>` | Get current price | `/price BTC` |
-| `/symbols` | List supported cryptocurrencies | `/symbols` |
-| `/setalert <symbol> <price> <above/below>` | Create price alert | `/setalert BTC 50000 above` |
-| `/alerts` | View your active alerts | `/alerts` |
-| `/deletealert <id>` | Delete specific alert | `/deletealert 1` |
-| `/stats` | Show your alert statistics | `/stats` |
+| Command                                    | Description                     | Example                     |
+| ------------------------------------------ | ------------------------------- | --------------------------- |
+| `/start`                                   | Welcome message and overview    | `/start`                    |
+| `/help`                                    | Show all available commands     | `/help`                     |
+| `/price <symbol>`                          | Get current price               | `/price BTC`                |
+| `/symbols`                                 | List supported cryptocurrencies | `/symbols`                  |
+| `/setalert <symbol> <price> <above/below>` | Create price alert              | `/setalert BTC 50000 above` |
+| `/alerts`                                  | View your active alerts         | `/alerts`                   |
+| `/deletealert <id>`                        | Delete specific alert           | `/deletealert 1`            |
+| `/stats`                                   | Show your alert statistics      | `/stats`                    |
 
 ## 🛠️ Installation
 
@@ -33,28 +33,33 @@ Telegram bot for tracking cryptocurrency prices and managing price alerts.
 ### Quick Start
 
 1. **Clone the repository**
+
    ```bash
    git clone https://github.com/roman-bezak/CryptoTrackPriceBot.git
    cd CryptoTrackPriceBot
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Setup environment**
+
    ```bash
    cp env.example .env
    ```
-   
+
    Edit `.env` and add your Telegram bot token:
+
    ```
    BOT_TOKEN=your-telegram-bot-token
    DATABASE_URL=file:./db/bot.db
    ```
 
 4. **Setup database**
+
    ```bash
    npx prisma migrate deploy
    ```
@@ -75,11 +80,11 @@ docker-compose up -d
 
 ## 📋 Environment Variables
 
-| Variable | Description | Required | Default |
-|----------|-------------|----------|---------|
-| `BOT_TOKEN` | Telegram Bot API token | ✅ | - |
-| `DATABASE_URL` | SQLite database path | ❌ | `file:./db/bot.db` |
-| `NODE_ENV` | Environment mode | ❌ | `production` |
+| Variable       | Description            | Required | Default            |
+| -------------- | ---------------------- | -------- | ------------------ |
+| `BOT_TOKEN`    | Telegram Bot API token | ✅       | -                  |
+| `DATABASE_URL` | SQLite database path   | ❌       | `file:./db/bot.db` |
+| `NODE_ENV`     | Environment mode       | ❌       | `production`       |
 
 ## 🔧 Development
 
@@ -139,15 +144,15 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## 📊 Supported Cryptocurrencies
 
-| Symbol | Name |
-|--------|------|
-| BTC | Bitcoin |
-| ETH | Ethereum |
-| BNB | Binance Coin |
-| ADA | Cardano |
-| SOL | Solana |
-| XRP | Ripple |
-| DOT | Polkadot |
-| DOGE | Dogecoin |
-| AVAX | Avalanche |
-| MATIC | Polygon |
+| Symbol | Name         |
+| ------ | ------------ |
+| BTC    | Bitcoin      |
+| ETH    | Ethereum     |
+| BNB    | Binance Coin |
+| ADA    | Cardano      |
+| SOL    | Solana       |
+| XRP    | Ripple       |
+| DOT    | Polkadot     |
+| DOGE   | Dogecoin     |
+| AVAX   | Avalanche    |
+| MATIC  | Polygon      |
