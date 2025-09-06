@@ -23,17 +23,17 @@ bot.command('users', async ctx => {
   try {
     const users = await prisma.user.findMany();
     if (users.length === 0) {
-      await ctx.reply('🙁 В базе нет пользователей.');
+      await ctx.reply('🙁 No users in database.');
       return;
     }
-    let message = '👥 Пользователи:\n\n';
+    let message = '👥 Users:\n\n';
     for (const user of users) {
-      message += `ID: ${user.id}\nChat ID: ${user.chatId}\nСоздан: ${user.createdAt.toISOString()}\n\n`;
+      message += `ID: ${user.id}\nChat ID: ${user.chatId}\nCreated: ${user.createdAt.toISOString()}\n\n`;
     }
     await ctx.reply(message.trim());
   } catch (error) {
-    console.error('Ошибка при получении пользователей:', error);
-    await ctx.reply('❌ Ошибка при получении пользователей из базы.');
+    console.error('Error fetching users:', error);
+    await ctx.reply('❌ Error fetching users from database.');
   }
 });
 
@@ -64,29 +64,29 @@ bot.command('price', async ctx => {
 
 // === Basic commands ===
 bot.start(ctx => {
-  const welcomeMessage = `🤖 *Добро пожаловать в CryptoTrackPriceBot!* v1.0.0
+  const welcomeMessage = `🤖 *Welcome to CryptoTrackPriceBot!* v1.0.0
 
-💰 Этот бот поможет вам отслеживать цены криптовалют и получать уведомления при достижении целевых уровней.
+💰 This bot helps you track cryptocurrency prices and receive notifications when target levels are reached.
 
-📋 *Доступные команды:*
+📋 *Available commands:*
 
-🔔 *Управление оповещениями:*
-• /setalert <символ> <цена> <условие> - Создать оповещение
-• /alerts - Показать ваши оповещения
-• /deletealert <ID> - Удалить оповещение
-• /stats - Статистика оповещений
+🔔 *Alert management:*
+• /setalert <symbol> <price> <condition> - Create alert
+• /alerts - Show your alerts
+• /deletealert <ID> - Delete alert
+• /stats - Alert statistics
 
-📊 *Информация:*
-• /price <символ> - Текущая цена криптовалюты
-• /symbols - Список поддерживаемых криптовалют
-• /help - Показать эту справку
+📊 *Information:*
+• /price <symbol> - Current cryptocurrency price
+• /symbols - List of supported cryptocurrencies
+• /help - Show this help
 
-💡 *Примеры:*
-• /setalert BTC 50000 above - Уведомить когда Bitcoin будет выше $50,000
-• /setalert ETH 3000 below - Уведомить когда Ethereum будет ниже $3,000
-• /price BTC - Показать текущую цену Bitcoin
+💡 *Examples:*
+• /setalert BTC 50000 above - Notify when Bitcoin is above $50,000
+• /setalert ETH 3000 below - Notify when Ethereum is below $3,000
+• /price BTC - Show current Bitcoin price
 
-Используйте /help для получения дополнительной информации.`;
+Use /help for more detailed information.`;
 
   ctx.reply(welcomeMessage, { parse_mode: 'Markdown' });
 });

@@ -1,240 +1,158 @@
-# CryptoTrackPriceBot 🤖
+# 🚀 CryptoTrackPriceBot
 
-Telegram бот для отслеживания цен криптовалют и получения уведомлений при достижении целевых уровней.
+Telegram bot for tracking cryptocurrency prices and managing price alerts.
 
-## 🚀 Возможности
+## ✨ Features
 
-- 📊 Отслеживание цен криптовалют в реальном времени
-- 🔔 Создание персональных оповещений о ценах
-- 📈 Уведомления при достижении целевых уровней (выше/ниже)
-- 📝 Управление списком оповещений
-- 📊 Статистика оповещений
-- 🧹 Автоматическая очистка старых оповещений
+- **Price Alerts** - Get notified when crypto prices reach your target levels
+- **Real-time Prices** - Check current cryptocurrency prices with 24h change
+- **Multiple Cryptos** - Support for 10 major cryptocurrencies (BTC, ETH, BNB, ADA, SOL, XRP, DOT, DOGE, AVAX, MATIC)
+- **Easy Management** - Simple commands to create, view, and delete alerts
+- **Auto Monitoring** - Background price checking every 5 minutes
 
-## 🛠 Технологии
+## 🤖 Bot Commands
 
-- **Node.js** (>=20.0.0)
-- **TypeScript**
-- **Telegraf** - Telegram Bot API
-- **Prisma** - ORM для работы с базой данных
-- **SQLite** - база данных
-- **CoinGecko API** - данные о ценах криптовалют
+| Command                                    | Description                     | Example                     |
+| ------------------------------------------ | ------------------------------- | --------------------------- |
+| `/start`                                   | Welcome message and overview    | `/start`                    |
+| `/help`                                    | Show all available commands     | `/help`                     |
+| `/price <symbol>`                          | Get current price               | `/price BTC`                |
+| `/symbols`                                 | List supported cryptocurrencies | `/symbols`                  |
+| `/setalert <symbol> <price> <above/below>` | Create price alert              | `/setalert BTC 50000 above` |
+| `/alerts`                                  | View your active alerts         | `/alerts`                   |
+| `/deletealert <id>`                        | Delete specific alert           | `/deletealert 1`            |
+| `/stats`                                   | Show your alert statistics      | `/stats`                    |
 
-## 📦 Установка
+## 🛠️ Installation
 
-1. Клонируйте репозиторий:
+### Prerequisites
 
-```bash
-git clone https://github.com/roman-bezak/CryptoTrackPriceBot.git
-cd CryptoTrackPriceBot
-```
+- Node.js >= 20.0.0
+- npm >= 9.0.0
 
-2. Установите зависимости:
+### Quick Start
 
-```bash
-npm install
-```
+1. **Clone the repository**
 
-3. Создайте файл `.env` на основе `.env.example`:
+   ```bash
+   git clone https://github.com/roman-bezak/CryptoTrackPriceBot.git
+   cd CryptoTrackPriceBot
+   ```
 
-```bash
-cp env.example .env
-```
+2. **Install dependencies**
 
-4. Настройте переменные окружения в `.env`:
+   ```bash
+   npm install
+   ```
 
-```env
-DATABASE_URL="file:./db/dev.db"
-NODE_ENV="development"
-BOT_TOKEN="your_telegram_bot_token"
-```
+3. **Setup environment**
 
-5. Выполните миграции базы данных:
+   ```bash
+   cp env.example .env
+   ```
 
-```bash
-npx prisma migrate dev
-```
+   Edit `.env` and add your Telegram bot token:
 
-6. Соберите проект:
+   ```
+   BOT_TOKEN=your-telegram-bot-token
+   DATABASE_URL=file:./db/bot.db
+   ```
 
-```bash
-npm run build
-```
+4. **Setup database**
 
-## 🚀 Запуск
+   ```bash
+   npx prisma migrate deploy
+   ```
 
-### Разработка
+5. **Build and start**
+   ```bash
+   npm run build
+   npm run start:prod
+   ```
 
-```bash
-npm run start:dev
-```
+### 🐳 Docker
 
-### Продакшн
-
-```bash
-npm run start:prod
-```
-
-## 📋 Команды бота
-
-### 🔔 Управление оповещениями
-
-#### `/setalert <символ> <цена> <условие>`
-
-Создает оповещение для отслеживания цены криптовалюты.
-
-**Параметры:**
-
-- `символ` - код криптовалюты (BTC, ETH, BNB и т.д.)
-- `цена` - целевая цена в долларах
-- `условие` - `above` (выше) или `below` (ниже)
-
-**Примеры:**
-
-```
-/setalert BTC 50000 above
-/setalert ETH 3000 below
-/setalert BNB 400 above
-```
-
-#### `/alerts`
-
-Показывает все ваши активные оповещения.
-
-#### `/deletealert <ID>`
-
-Удаляет оповещение по ID.
-
-#### `/stats`
-
-Показывает статистику ваших оповещений.
-
-### 📊 Информация о ценах
-
-#### `/price <символ>`
-
-Показывает текущую цену криптовалюты.
-
-**Пример:**
-
-```
-/price BTC
-```
-
-#### `/symbols`
-
-Показывает список всех поддерживаемых криптовалют.
-
-### 📚 Справка
-
-#### `/start`
-
-Приветственное сообщение с описанием возможностей бота.
-
-#### `/help`
-
-Подробная справка по всем командам.
-
-## 💰 Поддерживаемые криптовалюты
-
-- **Bitcoin (BTC)**
-- **Ethereum (ETH)**
-- **Binance Coin (BNB)**
-- **Cardano (ADA)**
-- **Solana (SOL)**
-- **Ripple (XRP)**
-- **Polkadot (DOT)**
-- **Dogecoin (DOGE)**
-- **Avalanche (AVAX)**
-- **Polygon (MATIC)**
-
-## 🔧 Как это работает
-
-1. **Создание оповещения**: Пользователь создает оповещение с помощью команды `/setalert`
-2. **Мониторинг цен**: Бот каждые 5 минут проверяет цены всех активных оповещений
-3. **Уведомления**: Когда цена достигает целевого уровня, пользователь получает уведомление
-4. **Автоматическое отключение**: Оповещение автоматически отключается после срабатывания
-5. **Очистка**: Старые сработавшие оповещения автоматически удаляются через 30 дней
-
-## 🏗 Архитектура
-
-### Сервисы
-
-- **CryptoPriceService** - получение цен криптовалют через API CoinGecko
-- **AlertService** - управление оповещениями в базе данных
-- **NotificationService** - отправка уведомлений пользователям
-- **AlertCheckerService** - периодическая проверка оповещений
-
-### База данных
-
-- **User** - пользователи бота
-- **PriceAlert** - оповещения о ценах
-
-## 🐳 Docker
-
-### Запуск с Docker Compose
+Run with Docker Compose:
 
 ```bash
-# Разработка
-docker-compose up
-
-# Продакшн
-docker-compose -f docker-compose-production.yml up -d
+docker-compose up -d
 ```
 
-## 📝 Скрипты
+## 📋 Environment Variables
 
-```bash
-# Сборка проекта
-npm run build
+| Variable       | Description            | Required | Default            |
+| -------------- | ---------------------- | -------- | ------------------ |
+| `BOT_TOKEN`    | Telegram Bot API token | ✅       | -                  |
+| `DATABASE_URL` | SQLite database path   | ❌       | `file:./db/bot.db` |
+| `NODE_ENV`     | Environment mode       | ❌       | `production`       |
 
-# Запуск в режиме разработки
-npm run start:dev
+## 🔧 Development
 
-# Запуск в продакшн режиме
-npm run start:prod
+### Scripts
 
-# Линтинг
-npm run lint
+- `npm run build` - Build the project
+- `npm run start:dev` - Start in development mode
+- `npm run start:prod` - Start in production mode
+- `npm run lint` - Run ESLint
+- `npm run format` - Format code with Prettier
+- `npm run precheck` - Run all checks (format, lint, type-check)
 
-# Исправление ошибок линтера
-npm run lint:fix
+### Project Structure
 
-# Проверка типов TypeScript
-npm run ts:lint
-
-# Форматирование кода
-npm run format
+```
+src/
+├── config/          # Configuration service
+├── handlers/        # Telegram command handlers
+├── services/        # Business logic services
+└── main.ts          # Application entry point
 ```
 
-## 🔒 Безопасность
+## 💡 Usage Examples
 
-- Все пользовательские данные хранятся локально в SQLite
-- API ключи и токены хранятся в переменных окружения
-- Валидация всех пользовательских входных данных
-- Обработка ошибок и исключений
+### Setting Price Alerts
 
-## 🤝 Вклад в проект
+```
+/setalert BTC 45000 below    # Alert when Bitcoin drops below $45,000
+/setalert ETH 3000 above     # Alert when Ethereum rises above $3,000
+```
 
-1. Форкните репозиторий
-2. Создайте ветку для новой функции (`git checkout -b feature/amazing-feature`)
-3. Зафиксируйте изменения (`git commit -m 'Add amazing feature'`)
-4. Отправьте в ветку (`git push origin feature/amazing-feature`)
-5. Откройте Pull Request
+### Checking Prices
 
-## 📄 Лицензия
+```
+/price BTC              # Get Bitcoin current price
+/price ETH              # Get Ethereum current price
+```
 
-Этот проект лицензирован под MIT License - см. файл [LICENSE](LICENSE) для деталей.
+## 🔒 Getting Bot Token
 
-## 👨‍💻 Автор
+1. Message [@BotFather](https://t.me/botfather) on Telegram
+2. Create a new bot with `/newbot`
+3. Follow the instructions to get your bot token
+4. Add the token to your `.env` file
 
-**Roman Bezak**
+## 📄 License
 
-- Email: r.bezak77@gmail.com
-- GitHub: [@roman-bezak](https://github.com/roman-bezak)
+MIT License - see [LICENSE](LICENSE) file for details.
 
-## 🙏 Благодарности
+## 🤝 Contributing
 
-- [CoinGecko](https://coingecko.com/) - за предоставление API данных о криптовалютах
-- [Telegraf](https://telegraf.js.org/) - за отличную библиотеку для Telegram ботов
-- [Prisma](https://www.prisma.io/) - за современный ORM
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
+
+## 📊 Supported Cryptocurrencies
+
+| Symbol | Name         |
+| ------ | ------------ |
+| BTC    | Bitcoin      |
+| ETH    | Ethereum     |
+| BNB    | Binance Coin |
+| ADA    | Cardano      |
+| SOL    | Solana       |
+| XRP    | Ripple       |
+| DOT    | Polkadot     |
+| DOGE   | Dogecoin     |
+| AVAX   | Avalanche    |
+| MATIC  | Polygon      |

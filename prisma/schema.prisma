@@ -18,9 +18,9 @@ model PriceAlert {
   id        Int      @id @default(autoincrement())
   userId    Int
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  symbol    String   // например "BTC", "ETH"
+  symbol    String   // e.g. "BTC", "ETH"
   targetPrice Float
-  condition  String   // "above" или "below"
+  condition  String   // "above" or "below"
   isActive   Boolean  @default(true)
   createdAt  DateTime @default(now())
   triggeredAt DateTime?
