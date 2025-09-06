@@ -2,6 +2,8 @@ import * as path from 'path';
 
 import * as dotenv from 'dotenv';
 
+import { ErrorMessages } from '../../shared/messages/index.js';
+
 interface IAppConfig {
   DATABASE_URL: string;
   NODE_ENV: string;
@@ -35,7 +37,7 @@ export class ConfigService {
   public get(key: keyof IAppConfig): IAppConfig[keyof IAppConfig] {
     const value = this.config[key];
     if (value === undefined) {
-      throw new Error(`Config key '${key}' not found`);
+      throw new Error(ErrorMessages.CONFIG_KEY_NOT_FOUND(key));
     }
     return value;
   }

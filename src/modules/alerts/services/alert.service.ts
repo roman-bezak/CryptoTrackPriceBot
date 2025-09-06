@@ -1,28 +1,15 @@
-import { PrismaClient } from '@prisma/client';
+import { databaseService } from '../../../core/database/database.service.js';
+import { CRYPTO_CONSTANTS } from '../../../shared/constants/index.js';
+import { cryptoPriceService } from '../../prices/services/crypto-price.service.js';
 
-import { cryptoPriceService } from './CryptoPriceService.js';
-
-import type { ICryptoPrice } from './CryptoPriceService.js';
-import type { PriceAlert, User } from '@prisma/client';
-
-export interface ICreateAlertData {
-  chatId: string;
-  symbol: string;
-  targetPrice: number;
-  condition: 'above' | 'below';
-}
-
-export interface IAlertWithUser extends PriceAlert {
-  user: User;
-}
+import type { ICreateAlertData, IAlertWithUser, IAlertStats, ITriggeredAlert } from '../../../shared/types/index.js';
+import type { PriceAlert } from '@prisma/client';
 
 export class AlertService {
   private static instance: AlertService;
-  private prisma: PrismaClient;
+  private prisma = databaseService.getClient();
 
-  private constructor() {
-    this.prisma = new PrismaClient();
-  }
+  private constructor() {}
 
   public static getInstance(): AlertService {
     if (!AlertService.instance) {
@@ -58,15 +45,31 @@ export class AlertService {
     }
 
     // Create new alert
-    return await this.prisma.priceAlert.create({
-      data: {
-        userId: user.id,
-        symbol: data.symbol.toUpperCase(),
-        targetPrice: data.targetPrice,
-        condition: data.condition,
-        isActive: true,
-      },
-    });
+    try {
+      return await this.prisma.priceAlert.create({
+        data: {
+          userId: user.id,
+          symbol: data.symbol.toUpperCase(),
+          targetPrice: data.targetPrice,
+          condition: data.condition,
+          isActive: true,
+        },
+      });
+    } catch (error) {
+      // Handle Prisma unique constraint errors
+      if (error instanceof Error) {
+        const prismaError = error as Error & { code?: string };
+        if (
+          error.message.includes('Unique constraint failed') ||
+          error.message.includes('UNIQUE constraint failed') ||
+          prismaError.code === 'P2002'
+        ) {
+          throw new Error('Such alert already exists');
+        }
+      }
+      // Re-throw other errors
+      throw error;
+    }
   }
 
   /**
@@ -144,9 +147,9 @@ export class AlertService {
   /**
    * Check all active alerts
    */
-  public async checkAllAlerts(): Promise<Array<{ alert: IAlertWithUser; currentPrice: ICryptoPrice }>> {
+  public async checkAllAlerts(): Promise<ITriggeredAlert[]> {
     const alerts = await this.getAllActiveAlerts();
-    const triggeredAlerts: Array<{ alert: IAlertWithUser; currentPrice: ICryptoPrice }> = [];
+    const triggeredAlerts: ITriggeredAlert[] = [];
 
     // Group alerts by symbols for request optimization
     const symbolGroups = new Map<string, IAlertWithUser[]>();
@@ -185,11 +188,7 @@ export class AlertService {
   /**
    * Get user alert statistics
    */
-  public async getUserAlertStats(chatId: string): Promise<{
-    total: number;
-    active: number;
-    triggered: number;
-  }> {
+  public async getUserAlertStats(chatId: string): Promise<IAlertStats> {
     const user = await this.prisma.user.findUnique({
       where: { chatId },
     });
@@ -214,17 +213,17 @@ export class AlertService {
   }
 
   /**
-   * Clean up old triggered alerts (older than 30 days)
+   * Clean up old triggered alerts
    */
   public async cleanupOldAlerts(): Promise<void> {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - CRYPTO_CONSTANTS.OLD_ALERTS_RETENTION_DAYS);
 
     await this.prisma.priceAlert.deleteMany({
       where: {
         triggeredAt: {
           not: null,
-          lt: thirtyDaysAgo,
+          lt: cutoffDate,
         },
       },
     });
