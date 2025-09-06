@@ -2,6 +2,8 @@ import { PrismaClient } from '@prisma/client';
 import { Telegraf } from 'telegraf';
 
 import { config } from './config/ConfigService.js';
+import { AlertHandlers } from './handlers/AlertHandlers.js';
+import { AlertCheckerService } from './services/AlertCheckerService.js';
 
 // === Initial logs ===
 console.log(`🌍 NODE_ENV: ${config.get('NODE_ENV')}`);
@@ -12,27 +14,120 @@ const bot = new Telegraf(config.get('BOT_TOKEN'));
 
 const prisma = new PrismaClient();
 
+// === Initialize services ===
+const alertCheckerService = AlertCheckerService.getInstance(bot);
+const alertHandlers = new AlertHandlers(bot);
+
+// === Admin commands ===
 bot.command('users', async ctx => {
   try {
     const users = await prisma.user.findMany();
     if (users.length === 0) {
-      await ctx.reply('🙁 В базе нет пользователей.');
+      await ctx.reply('🙁 No users in database.');
       return;
     }
-    let message = '👥 Пользователи:\n\n';
+    let message = '👥 Users:\n\n';
     for (const user of users) {
-      message += `ID: ${user.id}\nChat ID: ${user.chatId}\nСоздан: ${user.createdAt.toISOString()}\n\n`;
+      message += `ID: ${user.id}\nChat ID: ${user.chatId}\nCreated: ${user.createdAt.toISOString()}\n\n`;
     }
     await ctx.reply(message.trim());
   } catch (error) {
-    console.error('Ошибка при получении пользователей:', error);
-    await ctx.reply('❌ Ошибка при получении пользователей из базы.');
+    console.error('Error fetching users:', error);
+    await ctx.reply('❌ Error fetching users from database.');
   }
 });
 
-// === Commands ===
-bot.start(ctx => ctx.reply('🤖 Welcome to CryptoTrackPriceBot! v1.0.0'));
-bot.help(ctx => ctx.reply('📚 Available commands:\n/start - Start the bot\n/help - Show this help'));
+// === Alert commands ===
+bot.command('setalert', async ctx => {
+  await alertHandlers.handleSetAlert(ctx);
+});
+
+bot.command('alerts', async ctx => {
+  await alertHandlers.handleGetAlerts(ctx);
+});
+
+bot.command('deletealert', async ctx => {
+  await alertHandlers.handleDeleteAlert(ctx);
+});
+
+bot.command('stats', async ctx => {
+  await alertHandlers.handleGetStats(ctx);
+});
+
+bot.command('symbols', async ctx => {
+  await alertHandlers.handleGetSymbols(ctx);
+});
+
+bot.command('price', async ctx => {
+  await alertHandlers.handleGetPrice(ctx);
+});
+
+// === Basic commands ===
+bot.start(ctx => {
+  const welcomeMessage = `🤖 *Welcome to CryptoTrackPriceBot!* v1.0.0
+
+💰 This bot helps you track cryptocurrency prices and receive notifications when target levels are reached.
+
+📋 *Available commands:*
+
+🔔 *Alert management:*
+• /setalert <symbol> <price> <condition> - Create alert
+• /alerts - Show your alerts
+• /deletealert <ID> - Delete alert
+• /stats - Alert statistics
+
+📊 *Information:*
+• /price <symbol> - Current cryptocurrency price
+• /symbols - List of supported cryptocurrencies
+• /help - Show this help
+
+💡 *Examples:*
+• /setalert BTC 50000 above - Notify when Bitcoin is above $50,000
+• /setalert ETH 3000 below - Notify when Ethereum is below $3,000
+• /price BTC - Show current Bitcoin price
+
+Use /help for more detailed information.`;
+
+  ctx.reply(welcomeMessage, { parse_mode: 'Markdown' });
+});
+
+bot.help(ctx => {
+  const helpMessage = `📚 *CryptoTrackPriceBot Command Guide*
+
+🔔 *Creating alerts:*
+/setalert <symbol> <price> <condition>
+Creates an alert for tracking cryptocurrency price.
+
+*Parameters:*
+• symbol - cryptocurrency code (BTC, ETH, BNB, etc.)
+• price - target price in dollars
+• condition - above or below
+
+*Examples:*
+• /setalert BTC 50000 above
+• /setalert ETH 3000 below
+• /setalert BNB 400 above
+
+📝 *Alert management:*
+• /alerts - Show all your active alerts
+• /deletealert <ID> - Delete alert by ID
+• /stats - Show your alert statistics
+
+📊 *Price information:*
+• /price <symbol> - Show current cryptocurrency price
+• /symbols - List of all supported cryptocurrencies
+
+💡 *How it works:*
+1. Create an alert using /setalert
+2. Bot will check prices every 5 minutes
+3. When price reaches target level, you'll receive notification
+4. Alert automatically disables after triggering
+
+🔧 *Supported cryptocurrencies:*
+Bitcoin (BTC), Ethereum (ETH), Binance Coin (BNB), Cardano (ADA), Solana (SOL), Ripple (XRP), Polkadot (DOT), Dogecoin (DOGE), Avalanche (AVAX), Polygon (MATIC)`;
+
+  ctx.reply(helpMessage, { parse_mode: 'Markdown' });
+});
 
 // === Runtime error handler ===
 bot.catch((err, ctx) => {
@@ -43,6 +138,12 @@ bot.catch((err, ctx) => {
 try {
   bot.launch({ dropPendingUpdates: true }, () => {
     console.log('✅ Bot successfully launched!');
+
+    // Start alert checking service
+    alertCheckerService.startChecking(5); // Check every 5 minutes
+    alertCheckerService.startCleanup(24); // Cleanup every 24 hours
+
+    console.log('🔄 Alert checking service started');
   });
 } catch (error) {
   console.error('❌ Failed to launch bot:', error);
@@ -52,8 +153,19 @@ try {
 // === Graceful shutdown ===
 const gracefulShutdown = (signal: string) => {
   console.log(`\n🛑 Received ${signal}, stopping bot...`);
+
+  // Stop alert checking service
+  alertCheckerService.stopChecking();
+  console.log('🛑 Alert checking service stopped');
+
+  // Stop bot
   bot.stop(signal);
   console.log('✅ Bot stopped gracefully');
+
+  // Close database connection
+  prisma.$disconnect();
+  console.log('✅ Database connection closed');
+
   process.exit(0);
 };
 

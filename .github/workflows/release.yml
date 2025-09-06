@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - "v*.*.*"
+      - 'v*.*.*'
 
 run-name: '📄 Publish Release - ${{ github.ref_name }}'
 
@@ -51,9 +51,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
-          name: "🚀 Release ${{ github.ref_name }}"
+          name: '🚀 Release ${{ github.ref_name }}'
           body: ${{ env.notes }}
-          files: "" # empty → only source code
+          files: '' # empty → only source code
           generate_release_notes: true # TODO: check fallback
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

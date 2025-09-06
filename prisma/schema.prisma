@@ -8,7 +8,22 @@ datasource db {
 }
 
 model User {
+  id         Int          @id @default(autoincrement())
+  chatId     String       @unique
+  createdAt  DateTime     @default(now())
+  priceAlerts PriceAlert[]
+}
+
+model PriceAlert {
   id        Int      @id @default(autoincrement())
-  chatId    String   @unique
-  createdAt DateTime @default(now())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  symbol    String   // e.g. "BTC", "ETH"
+  targetPrice Float
+  condition  String   // "above" or "below"
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  triggeredAt DateTime?
+  
+  @@unique([userId, symbol, targetPrice, condition])
 }

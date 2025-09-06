@@ -4,7 +4,7 @@ services:
     container_name: crypto-track-price-bot-staging
     working_dir: /app
     ports:
-      - "${PRISMA_STUDIO_PORT}:5555"
+      - '${PRISMA_STUDIO_PORT}:5555'
     env_file:
       - .env
     volumes:
