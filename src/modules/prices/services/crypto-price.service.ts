@@ -1,15 +1,12 @@
 import axios from 'axios';
 
-export interface ICryptoPrice {
-  symbol: string;
-  price: number;
-  change24h: number;
-  lastUpdated: Date;
-}
+import { CRYPTO_CONSTANTS, type TSupportedSymbol } from '../../../shared/constants/index.js';
+import { ErrorMessages } from '../../../shared/messages/index.js';
+
+import type { ICryptoPrice } from '../../../shared/types/index.js';
 
 export class CryptoPriceService {
   private static instance: CryptoPriceService;
-  private readonly baseUrl = 'https://api.coingecko.com/api/v3';
 
   private constructor() {}
 
@@ -25,14 +22,14 @@ export class CryptoPriceService {
    */
   public async getPrice(symbol: string): Promise<ICryptoPrice | null> {
     try {
-      const response = await axios.get(`${this.baseUrl}/simple/price`, {
+      const response = await axios.get(`${CRYPTO_CONSTANTS.COINGECKO_BASE_URL}/simple/price`, {
         params: {
           ids: this.getCoinId(symbol),
           vs_currencies: 'usd',
           include_24hr_change: true,
           include_last_updated_at: true,
         },
-        timeout: 10000,
+        timeout: CRYPTO_CONSTANTS.REQUEST_TIMEOUT,
       });
 
       const coinId = this.getCoinId(symbol);
@@ -49,7 +46,7 @@ export class CryptoPriceService {
         lastUpdated: new Date(data.last_updated_at * 1000),
       };
     } catch (error) {
-      console.error(`Error getting price for ${symbol}:`, error);
+      console.error(ErrorMessages.PRICE_FETCH_FAILED(symbol), error);
       return null;
     }
   }
@@ -85,58 +82,23 @@ export class CryptoPriceService {
    * Get list of supported cryptocurrencies
    */
   public getSupportedSymbols(): string[] {
-    return [
-      'bitcoin',
-      'ethereum',
-      'binancecoin',
-      'cardano',
-      'solana',
-      'ripple',
-      'polkadot',
-      'dogecoin',
-      'avalanche-2',
-      'polygon',
-    ];
+    return Object.values(CRYPTO_CONSTANTS.SYMBOL_TO_COIN_ID);
   }
 
   /**
    * Convert symbol to ID for CoinGecko API
    */
   public getCoinId(symbol: string): string {
-    const symbolMap: Record<string, string> = {
-      BTC: 'bitcoin',
-      ETH: 'ethereum',
-      BNB: 'binancecoin',
-      ADA: 'cardano',
-      SOL: 'solana',
-      XRP: 'ripple',
-      DOT: 'polkadot',
-      DOGE: 'dogecoin',
-      AVAX: 'avalanche-2',
-      MATIC: 'polygon',
-    };
-
-    return symbolMap[symbol.toUpperCase()] || symbol.toLowerCase();
+    const upperSymbol = symbol.toUpperCase() as TSupportedSymbol;
+    return CRYPTO_CONSTANTS.SYMBOL_TO_COIN_ID[upperSymbol] || symbol.toLowerCase();
   }
 
   /**
    * Get readable cryptocurrency name
    */
   public getCoinName(symbol: string): string {
-    const nameMap: Record<string, string> = {
-      BTC: 'Bitcoin',
-      ETH: 'Ethereum',
-      BNB: 'Binance Coin',
-      ADA: 'Cardano',
-      SOL: 'Solana',
-      XRP: 'Ripple',
-      DOT: 'Polkadot',
-      DOGE: 'Dogecoin',
-      AVAX: 'Avalanche',
-      MATIC: 'Polygon',
-    };
-
-    return nameMap[symbol.toUpperCase()] || symbol.toUpperCase();
+    const upperSymbol = symbol.toUpperCase() as TSupportedSymbol;
+    return CRYPTO_CONSTANTS.SYMBOL_TO_NAME[upperSymbol] || symbol.toUpperCase();
   }
 }
 
