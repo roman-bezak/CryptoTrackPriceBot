@@ -2,7 +2,13 @@ import { databaseService } from '../../../core/database/database.service.js';
 import { CRYPTO_CONSTANTS } from '../../../shared/constants/index.js';
 import { cryptoPriceService } from '../../prices/services/crypto-price.service.js';
 
-import type { ICreateAlertData, IAlertWithUser, IAlertStats, ITriggeredAlert } from '../../../shared/types/index.js';
+import type {
+  ICreateAlertData,
+  IAlertWithUser,
+  IAlertStats,
+  ITriggeredAlert,
+  ICryptoPrice,
+} from '../../../shared/types/index.js';
 import type { PriceAlert } from '@prisma/client';
 
 export class AlertService {
@@ -145,29 +151,53 @@ export class AlertService {
   }
 
   /**
-   * Check all active alerts
+   * Check all active alerts using optimized batch price fetching
    */
   public async checkAllAlerts(): Promise<ITriggeredAlert[]> {
     const alerts = await this.getAllActiveAlerts();
     const triggeredAlerts: ITriggeredAlert[] = [];
 
-    // Group alerts by symbols for request optimization
+    if (alerts.length === 0) {
+      console.log('📝 No active alerts to check');
+      return triggeredAlerts;
+    }
+
+    // Group alerts by symbols for optimization
     const symbolGroups = new Map<string, IAlertWithUser[]>();
+    const uniqueSymbols = new Set<string>();
+
     for (const alert of alerts) {
       const symbol = alert.symbol;
+      uniqueSymbols.add(symbol);
+
       if (!symbolGroups.has(symbol)) {
         symbolGroups.set(symbol, []);
       }
       symbolGroups.get(symbol)!.push(alert);
     }
 
-    // Check each group
+    console.log(
+      `🔍 Checking ${alerts.length} alerts for ${uniqueSymbols.size} symbols: ${Array.from(uniqueSymbols).join(', ')}`,
+    );
+
+    // Fetch all prices at once using batch request
+    const prices = await cryptoPriceService.getPrices(Array.from(uniqueSymbols));
+    const priceMap = new Map<string, ICryptoPrice>();
+
+    for (const price of prices) {
+      priceMap.set(price.symbol, price);
+    }
+
+    // Check each symbol group against fetched prices
     for (const [symbol, symbolAlerts] of symbolGroups) {
-      const currentPrice = await cryptoPriceService.getPrice(symbol);
+      const currentPrice = priceMap.get(symbol);
 
       if (!currentPrice) {
+        console.warn(`⚠️ No price data available for ${symbol}`);
         continue;
       }
+
+      console.log(`💰 Checking ${symbolAlerts.length} alerts for ${symbol} at $${currentPrice.price}`);
 
       for (const alert of symbolAlerts) {
         const isTriggered = cryptoPriceService.checkPriceAlert(
@@ -177,11 +207,19 @@ export class AlertService {
         );
 
         if (isTriggered) {
+          console.log(
+            `🚨 Alert triggered! ${symbol} ${alert.condition} $${alert.targetPrice} (current: $${currentPrice.price})`,
+          );
           triggeredAlerts.push({ alert, currentPrice });
+        } else {
+          console.log(
+            `✅ Alert not triggered: ${symbol} ${alert.condition} $${alert.targetPrice} (current: $${currentPrice.price})`,
+          );
         }
       }
     }
 
+    console.log(`🎯 Found ${triggeredAlerts.length} triggered alerts out of ${alerts.length} total`);
     return triggeredAlerts;
   }
 

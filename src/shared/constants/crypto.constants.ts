@@ -31,8 +31,8 @@ export const CRYPTO_CONSTANTS = {
   COINGECKO_BASE_URL: 'https://api.coingecko.com/api/v3',
   REQUEST_TIMEOUT: 10000, // 10 seconds
 
-  // Price checking intervals
-  DEFAULT_CHECK_INTERVAL_MINUTES: 5,
+  // Price checking intervals (increased to reduce API load)
+  DEFAULT_CHECK_INTERVAL_MINUTES: 10, // Increased from 5 to 10 minutes
   DEFAULT_CLEANUP_INTERVAL_HOURS: 24,
   FIRST_CLEANUP_DELAY_HOURS: 1,
 
