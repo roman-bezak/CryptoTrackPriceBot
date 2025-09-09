@@ -113,14 +113,15 @@ export class CryptoTrackPriceBotApp {
       // Setup graceful shutdown
       this.setupGracefulShutdown();
 
-      // Launch bot
-      await this.bot.launch({ dropPendingUpdates: true });
-      console.log(SystemMessages.BOT_LAUNCHED);
+      // Launch bot with callback
+      this.bot.launch({ dropPendingUpdates: true }, () => {
+        console.log('✅ Bot successfully launched!');
 
-      // Start alert checking service
-      this.alertCheckerService.startChecking();
-      this.alertCheckerService.startCleanup();
-      console.log(SystemMessages.ALERT_CHECKING_STARTED);
+        // Start alert checking service
+        this.alertCheckerService.startChecking();
+        this.alertCheckerService.startCleanup();
+        console.log(SystemMessages.ALERT_CHECKING_STARTED);
+      });
     } catch (error) {
       console.error(ErrorMessages.BOT_LAUNCH_FAILED, error);
       process.exit(1);
